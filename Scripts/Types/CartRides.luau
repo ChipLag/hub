@@ -33,9 +33,10 @@ flingToggle = CatTab:AddLoopingToggle("Start Fling", function() -- This will get
 	local victimHrp = victimChar.HumanoidRootPart
 	if myHrp == nil or victimHrp == nil then return end
 
-	myHrp.CFrame = CFrame.new(victimHrp.CFrame.Position + offset:ToXZ()) -- Helper function to convert to Vector2 with X and Z values. .Value returns the Vector2, :ToXY() with X and Y values, and :ToYZ() with Y and Z values.
 	if victim.Humanoid.Sit then
-		myHrp.CFrame.Position = CFrame.new(target.Value)
+		myHrp.CFrame = CFrame.new(target.Value)
+	else
+		myHrp.CFrame = CFrame.new(victimHrp.CFrame.Position + offset:ToXZ()) -- Helper function to convert to Vector2 with X and Z values. .Value returns the Vector2, :ToXY() with X and Y values, and :ToYZ() with Y and Z values.
 	end
 end,
 function(value) -- This function gets called whenever you toggle the switch. Not in the loop, just when the value changes
