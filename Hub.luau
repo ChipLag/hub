@@ -160,18 +160,17 @@ do
 
 	if playerThumb ~= "" then
 		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 64, 0, 64)
-		img.Position = UDim2.new(0, 16, 0.5, -32)
+		img.Size = UDim2.new(0.3, 0, 1, 0)
+		img.Position = UDim2.new(0, 0, 0, 0)
 		img.BackgroundTransparency = 1
 		img.Image = playerThumb
 		img.ScaleType = Enum.ScaleType.Crop
 		img.Parent = frame
-		local imgCorner = Instance.new("UICorner"); imgCorner.CornerRadius = UDim.new(0, 8); imgCorner.Parent = img
 	end
 
 	local textContainer = Instance.new("Frame")
-	textContainer.Size = UDim2.new(1, playerThumb ~= "" and -104 or -40, 1, 0)
-	textContainer.Position = UDim2.new(0, playerThumb ~= "" and 88 or 20, 0, 0)
+	textContainer.Size = UDim2.new(1, playerThumb ~= "" and -130 or -40, 1, 0)
+	textContainer.Position = UDim2.new(0, playerThumb ~= "" and 110 or 20, 0, 0)
 	textContainer.BackgroundTransparency = 1
 	textContainer.Parent = frame
 
@@ -223,18 +222,17 @@ do
 
 	if gameThumb ~= "" then
 		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0, 64, 0, 64)
-		img.Position = UDim2.new(0, 16, 0.5, -32)
+		img.Size = UDim2.new(0.3, 0, 1, 0)
+		img.Position = UDim2.new(0, 0, 0, 0)
 		img.BackgroundTransparency = 1
 		img.Image = gameThumb
 		img.ScaleType = Enum.ScaleType.Crop
 		img.Parent = frame
-		local imgCorner = Instance.new("UICorner"); imgCorner.CornerRadius = UDim.new(0, 8); imgCorner.Parent = img
 	end
 
 	local textContainer = Instance.new("Frame")
-	textContainer.Size = UDim2.new(1, gameThumb ~= "" and -104 or -40, 1, 0)
-	textContainer.Position = UDim2.new(0, gameThumb ~= "" and 88 or 20, 0, 0)
+	textContainer.Size = UDim2.new(1, gameThumb ~= "" and -130 or -40, 1, 0)
+	textContainer.Position = UDim2.new(0, gameThumb ~= "" and 110 or 20, 0, 0)
 	textContainer.BackgroundTransparency = 1
 	textContainer.Parent = frame
 
