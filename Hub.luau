@@ -1,6 +1,7 @@
 --// Hub.luau
 --// ChipLag Hub V2 - Main Orchestrator
 --// Repository: https://github.com/ChipLag/hub
+print("Hub V2 loaded - Build 2026-08-18")
 
 local repo = "https://raw.githubusercontent.com/ChipLag/hub/refs/heads/main/"
 
