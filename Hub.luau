@@ -23,7 +23,7 @@ local Window = ChipLib.new({ Name = "ChipLag Hub" })
 local Esp = ChipEsp.new()
 
 Window._Esp = Esp
-Window.Settings = { TargetFriends = false }
+Window.Settings = { ExcludeFriends = true }
 
 --// ============================================================
 --// Hub State
@@ -98,7 +98,7 @@ local function saveSettings(settings)
 end
 
 local SavedSettings = loadSettings()
-Window.Settings.TargetFriends = SavedSettings.TargetFriends == true
+	Window.Settings.ExcludeFriends = SavedSettings.ExcludeFriends ~= false
 
 --// ============================================================
 --// Extend Window with script-specific API
@@ -329,9 +329,9 @@ do
 	local OptionsTab = Window:AddTab("Options", 99)
 	local OptionsCat = OptionsTab:AddCategory("Settings")
 
-	OptionsCat:AddToggle("Target Friends", Window.Settings.TargetFriends == true, function(state)
-		Window.Settings.TargetFriends = state
-		SavedSettings.TargetFriends = state
+	OptionsCat:AddToggle("Exclude Friends", Window.Settings.ExcludeFriends == true, function(state)
+		Window.Settings.ExcludeFriends = state
+		SavedSettings.ExcludeFriends = state
 		saveSettings(SavedSettings)
 	end)
 end
