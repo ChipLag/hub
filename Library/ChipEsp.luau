@@ -200,11 +200,101 @@ function EspLibrary.new()
 			return Txt
 		end
 
+		function Cat:Highlight(options)
+			options = options or {}
+			local HighlightObj = {}
+			HighlightObj._ShouldShow = true
+			HighlightObj._TargetPart = options.TargetPart
+			HighlightObj._ShowText = options.ShowText or nil
+			HighlightObj._BorderColor = options.BorderColor or Color3.new(1, 0, 0)
+			HighlightObj._FillColor = options.FillColor or Color3.new(1, 0, 0)
+			HighlightObj._Transparency = options.Transparency or 0.5
+
+			local hl = Instance.new("Highlight")
+			hl.Adornee = HighlightObj._TargetPart
+			hl.FillColor = HighlightObj._FillColor
+			hl.OutlineColor = HighlightObj._BorderColor
+			hl.FillTransparency = HighlightObj._Transparency
+			hl.Enabled = true
+			hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+			hl.Parent = workspace
+			HighlightObj._Highlight = hl
+
+			if HighlightObj._ShowText then
+				local txt = Drawing.new("Text")
+				txt.Visible = false
+				txt.Color = HighlightObj._BorderColor
+				txt.Size = 14
+				txt.Center = true
+				txt.Outline = true
+				txt.OutlineColor = Color3.new(0, 0, 0)
+				txt.Text = tostring(HighlightObj._ShowText)
+				HighlightObj._TextLabel = txt
+			end
+
+			function HighlightObj:SetVisible(v)
+				HighlightObj._ShouldShow = v
+				if HighlightObj._Highlight then
+					HighlightObj._Highlight.Enabled = v
+				end
+				if HighlightObj._TextLabel then
+					HighlightObj._TextLabel.Visible = false
+				end
+			end
+
+			function HighlightObj:SetTargetPart(part)
+				HighlightObj._TargetPart = part
+				if HighlightObj._Highlight then
+					HighlightObj._Highlight.Adornee = part
+				end
+			end
+
+			function HighlightObj:SetTransparency(t)
+				HighlightObj._Transparency = t
+				if HighlightObj._Highlight then
+					HighlightObj._Highlight.FillTransparency = t
+				end
+			end
+
+			function HighlightObj:Destroy()
+				if HighlightObj._Highlight then
+					HighlightObj._Highlight:Destroy()
+				end
+				if HighlightObj._TextLabel then
+					HighlightObj._TextLabel:Remove()
+				end
+			end
+
+			table.insert(Cat._Objects, HighlightObj)
+			table.insert(Esp._AllObjects, { obj = HighlightObj, cat = Cat, kind = "highlight" })
+			return HighlightObj
+		end
+
 		Esp._Categories[name] = Cat
 		return Cat
 	end
 
 	--// Render loop
+	local function updateHighlight(obj, cat)
+		if not obj._TargetPart then return end
+		local visible = cat._Visible and obj._ShouldShow and obj._Highlight and obj._Highlight.Adornee and obj._Highlight.Adornee.Parent ~= nil
+		if obj._Highlight then
+			obj._Highlight.Enabled = visible
+		end
+		if obj._TextLabel and visible then
+			local pos = obj._TargetPart.Position
+			local sp, onScreen = Camera:WorldToViewportPoint(pos + Vector3.new(0, 2, 0))
+			if onScreen then
+				obj._TextLabel.Position = Vector2.new(sp.X, sp.Y)
+				obj._TextLabel.Visible = true
+			else
+				obj._TextLabel.Visible = false
+			end
+		elseif obj._TextLabel then
+			obj._TextLabel.Visible = false
+		end
+	end
+
 	Esp._UpdateConn = RunService.RenderStepped:Connect(function()
 		Camera = workspace.CurrentCamera
 		for _, entry in Esp._AllObjects do
@@ -212,6 +302,8 @@ function EspLibrary.new()
 				pcall(updateBox, entry.obj, entry.cat)
 			elseif entry.kind == "text" then
 				pcall(updateText, entry.obj, entry.cat)
+			elseif entry.kind == "highlight" then
+				pcall(updateHighlight, entry.obj, entry.cat)
 			end
 		end
 	end)
