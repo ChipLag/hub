@@ -100,12 +100,12 @@ function Library.new(options)
 	new("UIStroke", { Color = T.Border, Thickness = 1, LineJoinMode = Enum.LineJoinMode.Round, Parent = Lib.Main })
 	new("UIAspectRatioConstraint", { AspectRatio = 2.0, Parent = Lib.Main })
 
-	local SidebarW = 180
+	local SidebarScale = 0.3
 
 	--// Sidebar
 	local Sidebar = new("Frame", {
 		Name = "Sidebar",
-		Size = UDim2.new(0, SidebarW, 1, 0),
+		Size = UDim2.new(SidebarScale, 0, 1, 0),
 		BackgroundColor3 = T.Sidebar,
 		BorderSizePixel = 0,
 		Parent = Lib.Main,
@@ -147,8 +147,8 @@ function Library.new(options)
 	--// Content
 	Lib.Content = new("Frame", {
 		Name = "Content",
-		Size = UDim2.new(1, -SidebarW - 1, 1, 0),
-		Position = UDim2.new(0, SidebarW + 1, 0, 0),
+		Size = UDim2.new(1 - SidebarScale, 0, 1, 0),
+		Position = UDim2.new(SidebarScale, 0, 0, 0),
 		BackgroundColor3 = T.Content,
 		BorderSizePixel = 0,
 		Parent = Lib.Main,
@@ -156,8 +156,7 @@ function Library.new(options)
 
 	local ContentScroll = new("ScrollingFrame", {
 		Name = "Scroll",
-		Size = UDim2.new(1, -12, 1, -12),
-		Position = UDim2.new(0, 6, 0, 6),
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		ScrollBarThickness = 3,
 		ScrollBarImageColor3 = T.Accent,
@@ -166,21 +165,24 @@ function Library.new(options)
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		Parent = Lib.Content,
 	})
+	new("UIPadding", {
+		PaddingTop = UDim.new(0, 6),
+		PaddingLeft = UDim.new(0, 6),
+		PaddingRight = UDim.new(0, 6),
+		PaddingBottom = UDim.new(0, 12),
+		Parent = ContentScroll,
+	})
 	new("UIListLayout", {
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Padding = UDim.new(0, 5),
-		Parent = ContentScroll,
-	})
-	new("UIPadding", {
-		PaddingBottom = UDim.new(0, 12),
 		Parent = ContentScroll,
 	})
 
 	--// Notifications
 	local NotifHolder = new("Frame", {
 		Name = "Notifications",
-		Size = UDim2.new(0, 300, 1, -16),
-		Position = UDim2.new(1, -310, 0, 8),
+		Size = UDim2.new(0.25, 0, 0.9, 0),
+		Position = UDim2.new(0.74, 0, 0.05, 0),
 		BackgroundTransparency = 1,
 		ZIndex = 100,
 		Parent = Lib.Gui,
@@ -252,29 +254,39 @@ function Library.new(options)
 		local on = default or false
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 48),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 56),
+			Parent = frame,
+		})
 
 		local label = new("TextLabel", {
-			Size = UDim2.new(1, -58, 1, 0),
-			Position = UDim2.new(0, 14, 0, 0),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
 		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = label })
 
 		local bg = new("Frame", {
-			Size = UDim2.new(0, 46, 0, 24),
-			Position = UDim2.new(1, -58, 0.5, -12),
+			Size = UDim2.new(0, 46, 0.55, 0),
+			Position = UDim2.new(1, -8, 0.5, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = on and T.TogOn or T.TogOff,
 			BorderSizePixel = 0,
 			Parent = frame,
@@ -283,7 +295,8 @@ function Library.new(options)
 
 		local dot = new("Frame", {
 			Size = UDim2.new(0, 20, 0, 20),
-			Position = on and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2),
+			Position = on and UDim2.new(1, -22, 0.5, 0) or UDim2.new(0, 2, 0.5, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = T.Text,
 			BorderSizePixel = 0,
 			Parent = bg,
@@ -294,7 +307,7 @@ function Library.new(options)
 		function obj:SetValue(v)
 			on = v
 			bg.BackgroundColor3 = on and T.TogOn or T.TogOff
-			dot.Position = on and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
+			dot.Position = on and UDim2.new(1, -22, 0.5, 0) or UDim2.new(0, 2, 0.5, 0)
 		end
 		function obj:GetValue() return on end
 		function obj:SetText(t) label.Text = t end
@@ -316,19 +329,35 @@ function Library.new(options)
 
 	local function createButton(parent, text, callback, order)
 		local btn = new("TextButton", {
-			Size = UDim2.new(1, 0, 0, 48),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
-			Text = "   " .. text,
-			TextColor3 = T.Text,
-			TextSize = 16,
-			Font = Enum.Font.Gotham,
-			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = "",
 			LayoutOrder = order or 0,
 			AutoButtonColor = false,
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = btn })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 8),
+			PaddingBottom = UDim.new(0, 8),
+			PaddingLeft = UDim.new(0, 10),
+			Parent = btn,
+		})
+
+		local label = new("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Text = text,
+			TextColor3 = T.Text,
+			TextScaled = true,
+			Font = Enum.Font.Gotham,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Parent = btn,
+		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = label })
 
 		btn.MouseEnter:Connect(function() btn.BackgroundColor3 = T.ElemHov end)
 		btn.MouseLeave:Connect(function() btn.BackgroundColor3 = T.Elem end)
@@ -337,14 +366,15 @@ function Library.new(options)
 		end)
 
 		local obj = {}
-		function obj:SetText(t) btn.Text = "   " .. t end
+		function obj:SetText(t) label.Text = t end
 		function obj:SetCallback(fn) callback = fn end
 		return obj
 	end
 
 	local function createTextBox(parent, text, default, order)
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 48),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
@@ -352,33 +382,51 @@ function Library.new(options)
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 10),
+			Parent = frame,
+		})
 
-		new("TextLabel", {
-			Size = UDim2.new(0.5, -60, 1, 0),
-			Position = UDim2.new(0, 14, 0, 0),
+		local label = new("TextLabel", {
+			Size = UDim2.new(0.45, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextWrapped = true,
 			Parent = frame,
 		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = label })
 
 		local input = new("TextBox", {
-			Size = UDim2.new(0.5, -20, 0, 30),
-			Position = UDim2.new(0.5, 10, 0, 9),
+			Size = UDim2.new(0.5, -10, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Position = UDim2.new(0.5, 5, 0, 0),
+			AnchorPoint = Vector2.new(0, 0),
 			BackgroundColor3 = T.Bg,
 			BorderSizePixel = 0,
 			Text = default or "",
 			TextColor3 = T.Text,
-			TextSize = 15,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			ClearTextOnFocus = false,
 			Parent = frame,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = input })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 4),
+			PaddingBottom = UDim.new(0, 4),
+			PaddingLeft = UDim.new(0, 6),
+			PaddingRight = UDim.new(0, 6),
+			Parent = input,
+		})
+		new("UITextSizeConstraint", { MaxTextSize = 15, Parent = input })
 
 		local obj = { Value = default or "" }
 		input:GetPropertyChangedSignal("Text"):Connect(function()
@@ -395,43 +443,60 @@ function Library.new(options)
 		default = default or min
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 48),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 10),
+			PaddingLeft = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 10),
+			Parent = frame,
+		})
 
-		new("TextLabel", {
-			Size = UDim2.new(0.5, -60, 1, 0),
-			Position = UDim2.new(0, 14, 0, 0),
+		local topRow = new("Frame", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Parent = frame,
+		})
+
+		local nameLabel = new("TextLabel", {
+			Size = UDim2.new(0.6, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextWrapped = true,
-			Parent = frame,
+			Parent = topRow,
 		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = nameLabel })
 
 		local valueLabel = new("TextLabel", {
-			Size = UDim2.new(0, 40, 1, 0),
-			Position = UDim2.new(1, -50, 0, 0),
+			Size = UDim2.new(0.35, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Position = UDim2.new(0.65, 0, 0, 0),
 			BackgroundTransparency = 1,
 			Text = tostring(default),
 			TextColor3 = T.Accent,
-			TextSize = 15,
+			TextScaled = true,
 			Font = Enum.Font.GothamBold,
 			TextXAlignment = Enum.TextXAlignment.Right,
-			Parent = frame,
+			Parent = topRow,
 		})
+		new("UITextSizeConstraint", { MaxTextSize = 15, Parent = valueLabel })
 
-		local trackX = 108
 		local track = new("Frame", {
-			Size = UDim2.new(1, -trackX - 58, 0, 6),
-			Position = UDim2.new(0, trackX, 0.5, -3),
+			Size = UDim2.new(1, 0, 0, 4),
+			Position = UDim2.new(0, 0, 0, 4),
 			BackgroundColor3 = T.Bg,
 			BorderSizePixel = 0,
 			Parent = frame,
@@ -515,55 +580,103 @@ function Library.new(options)
 		local val = default or Vector2.new(0, 0)
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 64),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 10),
+			Parent = frame,
+		})
 
-		new("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 22),
-			Position = UDim2.new(0, 14, 0, 0),
+		local titleLabel = new("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
 		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = titleLabel })
 
-		local function makeAxis(axisLabel, xPos, defaultVal)
+		local axisRow = new("Frame", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Parent = frame,
+		})
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 4),
+			Parent = axisRow,
+		})
+		new("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Left,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Padding = UDim.new(0, 4),
+			Parent = axisRow,
+		})
+
+		local function makeAxis(axisLabel, defaultVal)
+			local axisFrame = new("Frame", {
+				Size = UDim2.new(0.48, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Parent = axisRow,
+			})
+			new("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				Padding = UDim.new(0, 2),
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+				Parent = axisFrame,
+			})
 			new("TextLabel", {
-				Size = UDim2.new(0, 16, 0, 16),
-				Position = UDim2.new(0, xPos, 0, 28),
+				Size = UDim2.new(0, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundTransparency = 1,
 				Text = axisLabel,
 				TextColor3 = T.Accent,
-				TextSize = 15,
+				TextScaled = true,
 				Font = Enum.Font.GothamBold,
-				Parent = frame,
+				Parent = axisFrame,
 			})
 			local tb = new("TextBox", {
-				Size = UDim2.new(0, 60, 0, 24),
-				Position = UDim2.new(0, xPos + 18, 0, 26),
+				Size = UDim2.new(0.7, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundColor3 = T.Bg,
 				BorderSizePixel = 0,
 				Text = tostring(defaultVal),
 				TextColor3 = T.Text,
-				TextSize = 15,
+				TextScaled = true,
 				Font = Enum.Font.Gotham,
 				ClearTextOnFocus = false,
-				Parent = frame,
+				Parent = axisFrame,
 			})
 			new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = tb })
+			new("UIPadding", {
+				PaddingTop = UDim.new(0, 3),
+				PaddingBottom = UDim.new(0, 3),
+				PaddingLeft = UDim.new(0, 4),
+				PaddingRight = UDim.new(0, 4),
+				Parent = tb,
+			})
+			new("UITextSizeConstraint", { MaxTextSize = 15, Parent = tb })
 			return tb
 		end
 
-		local xTb = makeAxis("X", 14, val.X)
-		local yTb = makeAxis("Y", 108, val.Y)
+		local xTb = makeAxis("X", val.X)
+		local yTb = makeAxis("Y", val.Y)
 
 		local obj = { Value = val }
 		function obj:ToXZ() return Vector3.new(obj.Value.X, 0, obj.Value.Y) end
@@ -592,56 +705,104 @@ function Library.new(options)
 		local val = default or Vector3.new(0, 0, 0)
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 88),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 10),
+			Parent = frame,
+		})
 
-		new("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 22),
-			Position = UDim2.new(0, 14, 0, 0),
+		local titleLabel = new("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
 		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = titleLabel })
 
-		local function makeAxis(axisLabel, xPos, defaultVal)
+		local axisRow = new("Frame", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Parent = frame,
+		})
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 4),
+			Parent = axisRow,
+		})
+		new("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Left,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Padding = UDim.new(0, 3),
+			Parent = axisRow,
+		})
+
+		local function makeAxis(axisLabel, defaultVal)
+			local axisFrame = new("Frame", {
+				Size = UDim2.new(0.31, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Parent = axisRow,
+			})
+			new("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				Padding = UDim.new(0, 2),
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+				Parent = axisFrame,
+			})
 			new("TextLabel", {
-				Size = UDim2.new(0, 16, 0, 16),
-				Position = UDim2.new(0, xPos, 0, 28),
+				Size = UDim2.new(0, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundTransparency = 1,
 				Text = axisLabel,
 				TextColor3 = T.Accent,
-				TextSize = 15,
+				TextScaled = true,
 				Font = Enum.Font.GothamBold,
-				Parent = frame,
+				Parent = axisFrame,
 			})
 			local tb = new("TextBox", {
-				Size = UDim2.new(0, 48, 0, 24),
-				Position = UDim2.new(0, xPos + 18, 0, 26),
+				Size = UDim2.new(0.65, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundColor3 = T.Bg,
 				BorderSizePixel = 0,
 				Text = tostring(defaultVal),
 				TextColor3 = T.Text,
-				TextSize = 15,
+				TextScaled = true,
 				Font = Enum.Font.Gotham,
 				ClearTextOnFocus = false,
-				Parent = frame,
+				Parent = axisFrame,
 			})
 			new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = tb })
+			new("UIPadding", {
+				PaddingTop = UDim.new(0, 3),
+				PaddingBottom = UDim.new(0, 3),
+				PaddingLeft = UDim.new(0, 4),
+				PaddingRight = UDim.new(0, 4),
+				Parent = tb,
+			})
+			new("UITextSizeConstraint", { MaxTextSize = 15, Parent = tb })
 			return tb
 		end
 
-		local xTb = makeAxis("X", 14, val.X)
-		local yTb = makeAxis("Y", 90, val.Y)
-		local zTb = makeAxis("Z", 166, val.Z)
+		local xTb = makeAxis("X", val.X)
+		local yTb = makeAxis("Y", val.Y)
+		local zTb = makeAxis("Z", val.Z)
 
 		local obj = { Value = val }
 		function obj:GetValue() return obj.Value end
@@ -664,23 +825,55 @@ function Library.new(options)
 		yTb:GetPropertyChangedSignal("Text"):Connect(update)
 		zTb:GetPropertyChangedSignal("Text"):Connect(update)
 
-		local function makeSmallBtn(label, xPos, callback)
+		local btnRow = new("Frame", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Parent = frame,
+		})
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 4),
+			Parent = btnRow,
+		})
+		new("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Left,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			Padding = UDim.new(0, 4),
+			Parent = btnRow,
+		})
+
+		local function makeSmallBtn(label, callback)
 			local btn = new("TextButton", {
-				Size = UDim2.new(0, 80, 0, 24),
-				Position = UDim2.new(0, xPos, 0, 58),
+				Size = UDim2.new(0.48, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundColor3 = T.Bg,
 				BorderSizePixel = 0,
-				Text = label,
-				TextColor3 = T.Text,
-				TextSize = 13,
-				Font = Enum.Font.Gotham,
-				Parent = frame,
+				Text = "",
+				AutoButtonColor = false,
+				Parent = btnRow,
 			})
 			new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = btn })
+			new("UIPadding", {
+				PaddingTop = UDim.new(0, 3),
+				PaddingBottom = UDim.new(0, 3),
+				Parent = btn,
+			})
+			local lbl = new("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Text = label,
+				TextColor3 = T.Text,
+				TextScaled = true,
+				Font = Enum.Font.Gotham,
+				Parent = btn,
+			})
+			new("UITextSizeConstraint", { MaxTextSize = 13, Parent = lbl })
 			btn.MouseButton1Click:Connect(callback)
 		end
 
-		makeSmallBtn("Set here", 14, function()
+		makeSmallBtn("Set here", function()
 			local char = game:GetService("Players").LocalPlayer.Character
 			if char and char:FindFirstChild("HumanoidRootPart") then
 				local pos = char.HumanoidRootPart.Position
@@ -688,7 +881,7 @@ function Library.new(options)
 			end
 		end)
 
-		makeSmallBtn("Set null", 100, function()
+		makeSmallBtn("Set null", function()
 			obj:SetValue(Vector3.new(2000000, 2000000, 2000000))
 		end)
 
@@ -712,16 +905,23 @@ function Library.new(options)
 
 	local function createLabel(parent, text, order)
 		local lbl = new("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 24),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = "  " .. text,
 			TextColor3 = T.TextDim,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 2),
+			PaddingBottom = UDim.new(0, 2),
+			Parent = lbl,
+		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = lbl })
 		local obj = {}
 		function obj:SetText(t) lbl.Text = "  " .. t end
 		return obj
@@ -731,29 +931,39 @@ function Library.new(options)
 		local on = false
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 48),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 56),
+			Parent = frame,
+		})
 
 		local label = new("TextLabel", {
-			Size = UDim2.new(1, -58, 1, 0),
-			Position = UDim2.new(0, 14, 0, 0),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
 		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = label })
 
 		local bg = new("Frame", {
-			Size = UDim2.new(0, 46, 0, 24),
-			Position = UDim2.new(1, -58, 0.5, -12),
+			Size = UDim2.new(0, 46, 0.55, 0),
+			Position = UDim2.new(1, -8, 0.5, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = T.TogOff,
 			BorderSizePixel = 0,
 			Parent = frame,
@@ -762,7 +972,8 @@ function Library.new(options)
 
 		local dot = new("Frame", {
 			Size = UDim2.new(0, 20, 0, 20),
-			Position = UDim2.new(0, 2, 0, 2),
+			Position = UDim2.new(0, 2, 0.5, 0),
+			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = T.Text,
 			BorderSizePixel = 0,
 			Parent = bg,
@@ -793,7 +1004,7 @@ function Library.new(options)
 		function obj:SetValue(v)
 			on = v
 			bg.BackgroundColor3 = on and T.TogOn or T.TogOff
-			dot.Position = on and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
+			dot.Position = on and UDim2.new(1, -22, 0.5, 0) or UDim2.new(0, 2, 0.5, 0)
 			if on then
 				startLoop()
 			else
@@ -892,7 +1103,8 @@ function Library.new(options)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
 
 			local card = new("Frame", {
-				Size = UDim2.new(1, 0, 0, 80),
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundColor3 = T.Elem,
 				BorderSizePixel = 0,
 				LayoutOrder = order,
@@ -900,64 +1112,86 @@ function Library.new(options)
 				Parent = catFrame,
 			})
 			new("UICorner", { CornerRadius = UDim.new(0, 10), Parent = card })
+			new("UIPadding", {
+				PaddingTop = UDim.new(0, 8),
+				PaddingBottom = UDim.new(0, 8),
+				PaddingLeft = UDim.new(0, 10),
+				PaddingRight = UDim.new(0, 10),
+				Parent = card,
+			})
+
+			local cardContent = new("Frame", {
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Parent = card,
+			})
+			new("UIListLayout", {
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				Padding = UDim.new(0, 2),
+				Parent = cardContent,
+			})
 
 			local imgLabel = nil
 			if image and image ~= "" then
 				imgLabel = new("ImageLabel", {
-					Size = UDim2.new(0, 60, 0, 60),
-					Position = UDim2.new(0, 10, 0.5, -30),
+					Size = UDim2.new(0, 48, 0, 48),
 					BackgroundTransparency = 1,
 					Image = image,
 					ScaleType = Enum.ScaleType.Fit,
-					Parent = card,
+					LayoutOrder = 1,
+					Parent = cardContent,
 				})
 				new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = imgLabel })
 			end
 
-			local textX = imgLabel and 80 or 14
-			local textW = imgLabel and -textX - 14 or -28
-
 			local titleLabel = new("TextLabel", {
-				Size = UDim2.new(1, textW, 0, 24),
-				Position = UDim2.new(0, textX, 0, 12),
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundTransparency = 1,
 				Text = title or "",
 				TextColor3 = T.Text,
-				TextSize = 18,
+				TextScaled = true,
 				Font = Enum.Font.GothamBold,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				TextWrapped = true,
 				ClipsDescendants = true,
-				Parent = card,
+				LayoutOrder = 2,
+				Parent = cardContent,
 			})
+			new("UITextSizeConstraint", { MaxTextSize = 18, Parent = titleLabel })
 
 			local subLabel = new("TextLabel", {
-				Size = UDim2.new(1, textW, 0, 20),
-				Position = UDim2.new(0, textX, 0, 38),
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundTransparency = 1,
 				Text = subtitle or "",
 				TextColor3 = T.SubText,
-				TextSize = 14,
+				TextScaled = true,
 				Font = Enum.Font.Gotham,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				TextWrapped = true,
 				ClipsDescendants = true,
-				Parent = card,
+				LayoutOrder = 3,
+				Parent = cardContent,
 			})
+			new("UITextSizeConstraint", { MaxTextSize = 14, Parent = subLabel })
 
 			local footLabel = new("TextLabel", {
-				Size = UDim2.new(1, textW, 0, 18),
-				Position = UDim2.new(0, textX, 0, 58),
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundTransparency = 1,
 				Text = footer or "",
 				TextColor3 = T.SubText,
-				TextSize = 13,
+				TextScaled = true,
 				Font = Enum.Font.Gotham,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				TextWrapped = true,
 				ClipsDescendants = true,
-				Parent = card,
+				LayoutOrder = 4,
+				Parent = cardContent,
 			})
+			new("UITextSizeConstraint", { MaxTextSize = 13, Parent = footLabel })
 
 			local cardObj = {}
 			function cardObj:SetTitle(t) titleLabel.Text = t end
@@ -969,7 +1203,8 @@ function Library.new(options)
 		function catObj:AddFrame(size)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
 			local frame = new("CanvasGroup", {
-				Size = size or UDim2.new(1, 0, 0, 80),
+				Size = size or UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundTransparency = 1,
 				BorderSizePixel = 0,
 				LayoutOrder = order,
@@ -1012,19 +1247,35 @@ function Library.new(options)
 
 		local btn = new("TextButton", {
 			Name = name,
-			Size = UDim2.new(1, 0, 0, 44),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Sidebar,
 			BorderSizePixel = 0,
-			Text = "   " .. name,
-			TextColor3 = T.Text,
-			TextSize = 16,
-			Font = Enum.Font.Gotham,
-			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = "",
 			LayoutOrder = tabOrder,
 			AutoButtonColor = false,
 			Parent = TabsScroll,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = btn })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, 8),
+			Parent = btn,
+		})
+
+		local btnLabel = new("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Text = name,
+			TextColor3 = T.Text,
+			TextScaled = true,
+			Font = Enum.Font.Gotham,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Parent = btn,
+		})
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = btnLabel })
 
 		btn.MouseEnter:Connect(function()
 			if Lib._ActiveTab ~= name then btn.BackgroundColor3 = T.SideHov end
@@ -1063,32 +1314,48 @@ function Library.new(options)
 				Visible = false,
 				Parent = page,
 			})
+			new("UIPadding", {
+				PaddingBottom = UDim.new(0, 12),
+				Parent = catPage,
+			})
 			new("UIListLayout", {
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				Padding = UDim.new(0, 5),
 				Parent = catPage,
 			})
-			new("UIPadding", {
-				PaddingBottom = UDim.new(0, 12),
-				Parent = catPage,
-			})
 
 			local catBtn = new("TextButton", {
 				Name = name .. "/" .. catName,
-				Size = UDim2.new(1, -10, 0, 36),
+				Size = UDim2.new(1, -10, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
 				BackgroundColor3 = T.Sidebar,
 				BorderSizePixel = 0,
-				Text = "     " .. catName,
-				TextColor3 = T.TextDim,
-				TextSize = 15,
-				Font = Enum.Font.Gotham,
-				TextXAlignment = Enum.TextXAlignment.Left,
+				Text = "",
 				LayoutOrder = tabOrder + 0.5 + catOrder * 0.001,
 				Visible = false,
 				AutoButtonColor = false,
 				Parent = TabsScroll,
 			})
 			new("UICorner", { CornerRadius = UDim.new(0, 6), Parent = catBtn })
+			new("UIPadding", {
+				PaddingTop = UDim.new(0, 4),
+				PaddingBottom = UDim.new(0, 4),
+				PaddingLeft = UDim.new(0, 12),
+				Parent = catBtn,
+			})
+
+			local catBtnLabel = new("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Text = catName,
+				TextColor3 = T.TextDim,
+				TextScaled = true,
+				Font = Enum.Font.Gotham,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Parent = catBtn,
+			})
+			new("UITextSizeConstraint", { MaxTextSize = 15, Parent = catBtnLabel })
 
 			catBtn.MouseEnter:Connect(function()
 				if Lib._ActiveCat[name] ~= catName then catBtn.BackgroundColor3 = T.SideHov end
@@ -1119,13 +1386,13 @@ function Library.new(options)
 				Visible = true,
 				Parent = page,
 			})
+			new("UIPadding", {
+				PaddingBottom = UDim.new(0, 12),
+				Parent = catPage,
+			})
 			new("UIListLayout", {
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				Padding = UDim.new(0, 5),
-				Parent = catPage,
-			})
-			new("UIPadding", {
-				PaddingBottom = UDim.new(0, 12),
 				Parent = catPage,
 			})
 			buildCategory(Cat, catPage, Tab)
@@ -1180,10 +1447,8 @@ function Library.new(options)
 		for cn, cb in pairs(Lib._CatBtns[tabName]) do
 			if cn == catName then
 				cb.BackgroundColor3 = T.SideSel
-				cb.TextColor3 = T.Text
 			else
 				cb.BackgroundColor3 = T.Sidebar
-				cb.TextColor3 = T.TextDim
 			end
 		end
 		Lib._ActiveCat[tabName] = catName
@@ -1266,12 +1531,20 @@ function Library.new(options)
 
 		local notif = new("CanvasGroup", {
 			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundColor3 = T.Notif,
 			BorderSizePixel = 0,
 			ClipsDescendants = true,
 			Parent = NotifHolder,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = notif })
+		new("UIPadding", {
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, 10),
+			PaddingRight = UDim.new(0, 10),
+			Parent = notif,
+		})
 
 		local bar = new("Frame", {
 			Size = UDim2.new(1, 0, 0, 3),
@@ -1281,20 +1554,19 @@ function Library.new(options)
 			Parent = notif,
 		})
 
-		new("TextLabel", {
-			Size = UDim2.new(1, -18, 1, 0),
-			Position = UDim2.new(0, 14, 0, 0),
+		local notifLabel = new("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 16,
+			TextScaled = true,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextWrapped = true,
 			Parent = notif,
 		})
-
-		notif.Size = UDim2.new(1, 0, 0, 48)
+		new("UITextSizeConstraint", { MaxTextSize = 16, Parent = notifLabel })
 
 		local startTime = tick()
 		local conn
