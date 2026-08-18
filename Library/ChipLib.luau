@@ -84,7 +84,7 @@ function Library.new(options)
 	--// Main Frame (centered panel)
 	Lib.Main = new("Frame", {
 		Name = "Main",
-		Size = UDim2.new(0, isMobile() and 380 or 780, 0, isMobile() and 540 or 540),
+		Size = UDim2.new(0, isMobile() and 380 or 880, 0, isMobile() and 540 or 460),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = T.Bg,
@@ -95,7 +95,7 @@ function Library.new(options)
 	new("UICorner", { CornerRadius = UDim.new(0, 10), Parent = Lib.Main })
 	new("UIStroke", { Color = T.Border, Thickness = 1, Parent = Lib.Main })
 
-	local SidebarW = isMobile() and 120 or 200
+	local SidebarW = isMobile() and 120 or 180
 
 	--// Sidebar
 	local Sidebar = new("Frame", {
@@ -813,22 +813,30 @@ function Library.new(options)
 			})
 			new("UIListLayout", {
 				SortOrder = Enum.SortOrder.LayoutOrder,
-				Padding = UDim.new(0, 4),
+				Padding = UDim.new(0, 5),
 				Parent = catFrame,
 			})
 
-		pageOrder = pageOrder + 1
-		new("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 28),
-			BackgroundTransparency = 1,
-			Text = "  " .. catName,
-			TextColor3 = T.Accent,
-			TextSize = 15,
-			Font = Enum.Font.GothamBold,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			LayoutOrder = pageOrder,
-			Parent = catFrame,
-		})
+			pageOrder = pageOrder + 1
+			local catHeader = new("Frame", {
+				Size = UDim2.new(1, 0, 0, 36),
+				BackgroundColor3 = Color3.new(T.Accent.R * 0.25, T.Accent.G * 0.25, T.Accent.B * 0.25),
+				BorderSizePixel = 0,
+				LayoutOrder = pageOrder,
+				Parent = catFrame,
+			})
+			new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = catHeader })
+			new("TextLabel", {
+				Size = UDim2.new(1, -12, 1, 0),
+				Position = UDim2.new(0, 12, 0, 0),
+				BackgroundTransparency = 1,
+				Text = catName,
+				TextColor3 = T.Accent,
+				TextSize = 14,
+				Font = Enum.Font.GothamBold,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Parent = catHeader,
+			})
 
 			buildCategory(Cat, catFrame, Tab)
 			table.insert(Tab._Categories, Cat)
