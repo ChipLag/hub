@@ -30,8 +30,8 @@ Window._Esp = Esp
 local Hub = {}
 Hub._GameScriptLoaded = false
 Hub._TypesLoaded = 0
-Hub._GsStatus = nil
-Hub._TypesLabel = nil
+Hub._GsCard = nil
+Hub._TypesCard = nil
 Hub._Loading = {}
 
 --// ============================================================
@@ -84,8 +84,8 @@ end
 function Window:GameScript(name)
 	local tab = Window:AddTab(name, 20)
 	Hub._GameScriptLoaded = true
-	if Hub._GsStatus then
-		Hub._GsStatus:SetText("GameScript: Loaded")
+	if Hub._GsCard then
+		Hub._GsCard:SetSubtitle("GameScript: Loaded")
 	end
 	return tab
 end
@@ -140,19 +140,14 @@ pcall(function()
 	GameName = MarketplaceService:GetProductInfo(PlaceId).Name
 end)
 
-local playerThumb = ""
+local gameThumb = ""
 pcall(function()
-	playerThumb = Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+	gameThumb = "https://www.roblox.com/asset-thumbnail/image?assetId=" .. PlaceId .. "&width=420&height=420&format=png"
 end)
 
-if playerThumb ~= "" then
-	HomeCat:AddImage(playerThumb, 52)
-end
-
-HomeCat:AddLabel("Welcome, " .. Player.DisplayName .. "!")
-HomeCat:AddLabel("Game: " .. GameName)
-Hub._GsStatus = HomeCat:AddLabel("GameScript: None")
-Hub._TypesLabel = HomeCat:AddLabel("Generic Scripts: 0 loaded")
+	local GameCard = HomeCat:AddCard(gameThumb, GameName, "GameScript: None", "Generic Scripts: 0 loaded")
+	Hub._GsCard = GameCard
+	Hub._TypesCard = GameCard
 
 --// ============================================================
 --// Generic Scripts Tab
@@ -175,8 +170,8 @@ local function enableType(displayName, fileName)
 	else
 		LoadedTypes[displayName] = true
 		Hub._TypesLoaded = Hub._TypesLoaded + 1
-		if Hub._TypesLabel then
-			Hub._TypesLabel:SetText("Generic Scripts: " .. Hub._TypesLoaded .. " loaded")
+		if Hub._TypesCard then
+			Hub._TypesCard:SetFooter("Generic Scripts: " .. Hub._TypesLoaded .. " loaded")
 		end
 		SavedTypes[displayName] = true
 		saveEnabledTypes(SavedTypes)
@@ -205,8 +200,8 @@ local function disableType(displayName)
 
 	LoadedTypes[displayName] = nil
 	Hub._TypesLoaded = Hub._TypesLoaded - 1
-	if Hub._TypesLabel then
-		Hub._TypesLabel:SetText("Generic Scripts: " .. Hub._TypesLoaded .. " loaded")
+	if Hub._TypesCard then
+		Hub._TypesCard:SetFooter("Generic Scripts: " .. Hub._TypesLoaded .. " loaded")
 	end
 	SavedTypes[displayName] = nil
 	saveEnabledTypes(SavedTypes)
@@ -245,8 +240,8 @@ do
 		warn("[ChipLag] Loaded GameScript for place " .. tostring(PlaceId))
 	else
 		warn("[ChipLag] No GameScript for place " .. tostring(PlaceId) .. " (" .. tostring(err) .. ")")
-		if Hub._GsStatus then
-			Hub._GsStatus:SetText("GameScript: Error!")
+		if Hub._GsCard then
+			Hub._GsCard:SetSubtitle("GameScript: Error!")
 		end
 	end
 end

@@ -45,6 +45,7 @@ function Library.new(options)
 		Content  = Color3.fromRGB(28, 29, 40),
 		Accent   = Color3.fromRGB(100, 140, 255),
 		Text     = Color3.fromRGB(230, 232, 240),
+		SubText  = Color3.fromRGB(140, 145, 165),
 		TextDim  = Color3.fromRGB(140, 145, 165),
 		TogOn    = Color3.fromRGB(100, 140, 255),
 		TogOff   = Color3.fromRGB(55, 58, 70),
@@ -96,7 +97,7 @@ function Library.new(options)
 		Parent = Lib.Gui,
 	})
 	new("UICorner", { CornerRadius = UDim.new(0, 12), Parent = Lib.Main })
-	new("UIStroke", { Color = T.Border, Thickness = 1, Parent = Lib.Main })
+	new("UIStroke", { Color = T.Border, Thickness = 1, LineJoinMode = Enum.LineJoinMode.Round, Parent = Lib.Main })
 	new("UIAspectRatioConstraint", { AspectRatio = 2.0, Parent = Lib.Main })
 
 	local SidebarW = 180
@@ -347,12 +348,13 @@ function Library.new(options)
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
+			ClipsDescendants = true,
 			Parent = parent,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
 
 		new("TextLabel", {
-			Size = UDim2.new(0, 90, 1, 0),
+			Size = UDim2.new(0.5, -60, 1, 0),
 			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
@@ -360,12 +362,13 @@ function Library.new(options)
 			TextSize = 16,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
+			TextWrapped = true,
 			Parent = frame,
 		})
 
 		local input = new("TextBox", {
-			Size = UDim2.new(1, -118, 0, 28),
-			Position = UDim2.new(0, 100, 0, 6),
+			Size = UDim2.new(0.5, -20, 0, 30),
+			Position = UDim2.new(0.5, 10, 0, 9),
 			BackgroundColor3 = T.Bg,
 			BorderSizePixel = 0,
 			Text = default or "",
@@ -401,7 +404,7 @@ function Library.new(options)
 		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
 
 		new("TextLabel", {
-			Size = UDim2.new(0, 90, 1, 0),
+			Size = UDim2.new(0.5, -60, 1, 0),
 			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
@@ -409,6 +412,7 @@ function Library.new(options)
 			TextSize = 16,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
+			TextWrapped = true,
 			Parent = frame,
 		})
 
@@ -424,11 +428,9 @@ function Library.new(options)
 			Parent = frame,
 		})
 
-		local trackX = 106
-		local trackW = 180
-
+		local trackX = 108
 		local track = new("Frame", {
-			Size = UDim2.new(0, trackW, 0, 6),
+			Size = UDim2.new(1, -trackX - 58, 0, 6),
 			Position = UDim2.new(0, trackX, 0.5, -3),
 			BackgroundColor3 = T.Bg,
 			BorderSizePixel = 0,
@@ -856,6 +858,84 @@ function Library.new(options)
 		function catObj:AddImage(image, size)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
 			return createImage(catFrame, image, size, order)
+		end
+
+		function catObj:AddCard(image, title, subtitle, footer)
+			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
+
+			local card = new("Frame", {
+				Size = UDim2.new(1, 0, 0, 80),
+				BackgroundColor3 = T.Elem,
+				BorderSizePixel = 0,
+				LayoutOrder = order,
+				ClipsDescendants = true,
+				Parent = catFrame,
+			})
+			new("UICorner", { CornerRadius = UDim.new(0, 10), Parent = card })
+
+			local imgLabel = nil
+			if image and image ~= "" then
+				imgLabel = new("ImageLabel", {
+					Size = UDim2.new(0, 60, 0, 60),
+					Position = UDim2.new(0, 10, 0.5, -30),
+					BackgroundTransparency = 1,
+					Image = image,
+					ScaleType = Enum.ScaleType.Fit,
+					Parent = card,
+				})
+				new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = imgLabel })
+			end
+
+			local textX = imgLabel and 80 or 14
+			local textW = imgLabel and -textX - 14 or -28
+
+			local titleLabel = new("TextLabel", {
+				Size = UDim2.new(1, textW, 0, 24),
+				Position = UDim2.new(0, textX, 0, 12),
+				BackgroundTransparency = 1,
+				Text = title or "",
+				TextColor3 = T.Text,
+				TextSize = 18,
+				Font = Enum.Font.GothamBold,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextWrapped = true,
+				ClipsDescendants = true,
+				Parent = card,
+			})
+
+			local subLabel = new("TextLabel", {
+				Size = UDim2.new(1, textW, 0, 20),
+				Position = UDim2.new(0, textX, 0, 38),
+				BackgroundTransparency = 1,
+				Text = subtitle or "",
+				TextColor3 = T.SubText,
+				TextSize = 14,
+				Font = Enum.Font.Gotham,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextWrapped = true,
+				ClipsDescendants = true,
+				Parent = card,
+			})
+
+			local footLabel = new("TextLabel", {
+				Size = UDim2.new(1, textW, 0, 18),
+				Position = UDim2.new(0, textX, 0, 58),
+				BackgroundTransparency = 1,
+				Text = footer or "",
+				TextColor3 = T.SubText,
+				TextSize = 13,
+				Font = Enum.Font.Gotham,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				TextWrapped = true,
+				ClipsDescendants = true,
+				Parent = card,
+			})
+
+			local cardObj = {}
+			function cardObj:SetTitle(t) titleLabel.Text = t end
+			function cardObj:SetSubtitle(s) subLabel.Text = s end
+			function cardObj:SetFooter(f) footLabel.Text = f end
+			return cardObj
 		end
 
 		function catObj:AddLoopingToggle(text, loopFunc, changeFunc)

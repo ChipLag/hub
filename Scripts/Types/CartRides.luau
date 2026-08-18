@@ -19,7 +19,9 @@ local flingToggle
 flingToggle = CatTab:AddLoopingToggle("Start Fling", function() -- This will get run from a :Heartbeat loop, but ONLY if the value is true.
 	local victim = Window.Helpers:GetPlayer( CatTab:Get("victim").Value ) -- GetPlayer checks if it's "me" (LocalPlayer), the start of a player's normal ".Name" (priority) or their ".DisplayName" (convenience)
 	if victim == nil then
-		Window:Notification(2, "Player not Found!") -- Post a notification that exists for 2 seconds
+		Window:Notification(2, "Player not Found!")
+		flingToggle:Stop()
+		return
 	end
 	local myChar = Player.Character
 	local victimChar = victim.Character
