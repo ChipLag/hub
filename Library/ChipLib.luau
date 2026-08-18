@@ -63,6 +63,9 @@ function Library.new(options)
 	Lib._Tabs = {}
 	Lib._TabOrder = 10
 	Lib._SidebarBtns = {}
+	Lib._CatBtns = {}
+	Lib._CatPages = {}
+	Lib._ActiveCat = {}
 	Lib._Pages = {}
 	Lib._ActiveTab = nil
 	Lib._Heartbeats = {}
@@ -84,7 +87,7 @@ function Library.new(options)
 	--// Main Frame (centered panel)
 	Lib.Main = new("Frame", {
 		Name = "Main",
-		Size = UDim2.new(0, isMobile() and 380 or 880, 0, isMobile() and 540 or 460),
+		Size = UDim2.new(0, isMobile() and 380 or 960, 0, isMobile() and 540 or 440),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = T.Bg,
@@ -107,13 +110,13 @@ function Library.new(options)
 	})
 	new("UIPadding", {
 		PaddingTop = UDim.new(0, 8),
-		PaddingLeft = UDim.new(0, 8),
-		PaddingRight = UDim.new(0, 8),
+		PaddingLeft = UDim.new(0, 6),
+		PaddingRight = UDim.new(0, 6),
 		Parent = Sidebar,
 	})
 	new("UIListLayout", {
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 3),
+		Padding = UDim.new(0, 2),
 		Parent = Sidebar,
 	})
 
@@ -131,7 +134,7 @@ function Library.new(options)
 	})
 	new("UIListLayout", {
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 3),
+		Padding = UDim.new(0, 2),
 		Parent = TabsScroll,
 	})
 	new("UIPadding", {
@@ -171,7 +174,7 @@ function Library.new(options)
 		Parent = ContentScroll,
 	})
 
-	--// Notifications (on ScreenGui, not inside Main)
+	--// Notifications
 	local NotifHolder = new("Frame", {
 		Name = "Notifications",
 		Size = UDim2.new(0, 300, 1, -16),
@@ -206,7 +209,7 @@ function Library.new(options)
 		new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = ToggleBtn })
 
 		local dragging = false
-		local dragStart, startPos, dragInput
+		local dragStart, startPos
 
 		ToggleBtn.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -247,7 +250,7 @@ function Library.new(options)
 		local on = default or false
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 42),
+			Size = UDim2.new(1, 0, 0, 40),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
@@ -311,7 +314,7 @@ function Library.new(options)
 
 	local function createButton(parent, text, callback, order)
 		local btn = new("TextButton", {
-			Size = UDim2.new(1, 0, 0, 42),
+			Size = UDim2.new(1, 0, 0, 40),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			Text = "   " .. text,
@@ -339,7 +342,7 @@ function Library.new(options)
 
 	local function createTextBox(parent, text, default, order)
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 42),
+			Size = UDim2.new(1, 0, 0, 40),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
@@ -361,7 +364,7 @@ function Library.new(options)
 
 		local input = new("TextBox", {
 			Size = UDim2.new(1, -118, 0, 28),
-			Position = UDim2.new(0, 100, 0, 7),
+			Position = UDim2.new(0, 100, 0, 6),
 			BackgroundColor3 = T.Bg,
 			BorderSizePixel = 0,
 			Text = default or "",
@@ -379,6 +382,129 @@ function Library.new(options)
 		end)
 		function obj:GetValue() return obj.Value end
 		function obj:SetValue(v) input.Text = v; obj.Value = v end
+		return obj
+	end
+
+	local function createSlider(parent, text, min, max, default, order)
+		min = min or 0
+		max = max or 100
+		default = default or min
+
+		local frame = new("Frame", {
+			Size = UDim2.new(1, 0, 0, 40),
+			BackgroundColor3 = T.Elem,
+			BorderSizePixel = 0,
+			LayoutOrder = order or 0,
+			Parent = parent,
+		})
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
+
+		new("TextLabel", {
+			Size = UDim2.new(0, 90, 1, 0),
+			Position = UDim2.new(0, 14, 0, 0),
+			BackgroundTransparency = 1,
+			Text = text,
+			TextColor3 = T.Text,
+			TextSize = 14,
+			Font = Enum.Font.Gotham,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Parent = frame,
+		})
+
+		local valueLabel = new("TextLabel", {
+			Size = UDim2.new(0, 40, 1, 0),
+			Position = UDim2.new(1, -50, 0, 0),
+			BackgroundTransparency = 1,
+			Text = tostring(default),
+			TextColor3 = T.Accent,
+			TextSize = 13,
+			Font = Enum.Font.GothamBold,
+			TextXAlignment = Enum.TextXAlignment.Right,
+			Parent = frame,
+		})
+
+		local trackX = 106
+		local trackW = 180
+
+		local track = new("Frame", {
+			Size = UDim2.new(0, trackW, 0, 6),
+			Position = UDim2.new(0, trackX, 0.5, -3),
+			BackgroundColor3 = T.Bg,
+			BorderSizePixel = 0,
+			Parent = frame,
+		})
+		new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = track })
+
+		local function getFill()
+			return math.clamp((default - min) / (max - min), 0, 1)
+		end
+
+		local fill = new("Frame", {
+			Size = UDim2.new(getFill(), 0, 1, 0),
+			BackgroundColor3 = T.Accent,
+			BorderSizePixel = 0,
+			Parent = track,
+		})
+		new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = fill })
+
+		local handle = new("Frame", {
+			Size = UDim2.new(0, 16, 0, 16),
+			Position = UDim2.new(getFill(), 0, 0.5, -8),
+			BackgroundColor3 = T.Text,
+			BorderSizePixel = 0,
+			ZIndex = 2,
+			Parent = track,
+		})
+		new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = handle })
+
+		local obj = { Value = default }
+		local sliding = false
+
+		local function updateFromX(x)
+			local rel = math.clamp((x - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+			local val = math.floor(min + rel * (max - min) + 0.5)
+			default = val
+			obj.Value = val
+			fill.Size = UDim2.new(rel, 0, 1, 0)
+			handle.Position = UDim2.new(rel, 0, 0.5, -8)
+			valueLabel.Text = tostring(val)
+		end
+
+		handle.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				sliding = true
+			end
+		end)
+		UserInputService.InputChanged:Connect(function(input)
+			if sliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+				updateFromX(input.Position.X)
+			end
+		end)
+		UserInputService.InputEnded:Connect(function(input)
+			if sliding and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+				sliding = false
+			end
+		end)
+
+		track.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				sliding = true
+				updateFromX(input.Position.X)
+			end
+		end)
+
+		function obj:GetValue() return obj.Value end
+		function obj:SetValue(v)
+			v = math.clamp(math.floor(v + 0.5), min, max)
+			default = v
+			obj.Value = v
+			local rel = (v - min) / (max - min)
+			fill.Size = UDim2.new(rel, 0, 1, 0)
+			handle.Position = UDim2.new(rel, 0, 0.5, -8)
+			valueLabel.Text = tostring(v)
+		end
+		function obj:SetCallback(fn) obj._Callback = fn end
+
 		return obj
 	end
 
@@ -406,12 +532,12 @@ function Library.new(options)
 			Parent = frame,
 		})
 
-		local function makeAxis(label, xPos, defaultVal)
+		local function makeAxis(axisLabel, xPos, defaultVal)
 			new("TextLabel", {
 				Size = UDim2.new(0, 16, 0, 16),
 				Position = UDim2.new(0, xPos, 0, 28),
 				BackgroundTransparency = 1,
-				Text = label,
+				Text = axisLabel,
 				TextColor3 = T.Accent,
 				TextSize = 13,
 				Font = Enum.Font.GothamBold,
@@ -437,7 +563,6 @@ function Library.new(options)
 		local yTb = makeAxis("Y", 108, val.Y)
 
 		local obj = { Value = val }
-
 		function obj:ToXZ() return Vector3.new(obj.Value.X, 0, obj.Value.Y) end
 		function obj:ToXY() return Vector2.new(obj.Value.X, obj.Value.Y) end
 		function obj:ToYZ() return Vector3.new(0, obj.Value.X, obj.Value.Y) end
@@ -484,12 +609,12 @@ function Library.new(options)
 			Parent = frame,
 		})
 
-		local function makeAxis(label, xPos, defaultVal)
+		local function makeAxis(axisLabel, xPos, defaultVal)
 			new("TextLabel", {
 				Size = UDim2.new(0, 16, 0, 16),
 				Position = UDim2.new(0, xPos, 0, 28),
 				BackgroundTransparency = 1,
-				Text = label,
+				Text = axisLabel,
 				TextColor3 = T.Accent,
 				TextSize = 13,
 				Font = Enum.Font.GothamBold,
@@ -516,7 +641,6 @@ function Library.new(options)
 		local zTb = makeAxis("Z", 166, val.Z)
 
 		local obj = { Value = val }
-
 		function obj:GetValue() return obj.Value end
 		function obj:SetValue(v)
 			obj.Value = v
@@ -576,7 +700,7 @@ function Library.new(options)
 		local on = false
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 42),
+			Size = UDim2.new(1, 0, 0, 40),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
@@ -672,7 +796,7 @@ function Library.new(options)
 	end
 
 	--// ============================================================
-	--// Category Builder (shared between Tab and NoCategory)
+	--// Category Builder
 	--// ============================================================
 
 	local function buildCategory(catObj, catFrame, tabObj)
@@ -688,12 +812,21 @@ function Library.new(options)
 
 		function catObj:AddButton(text, callback)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
-			return createButton(catFrame, text, callback, order)
+			local elem = createButton(catFrame, text, callback, order)
+			catObj._Elements[text] = elem
+			return elem
 		end
 
 		function catObj:AddTextBox(text, default)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
 			local elem = createTextBox(catFrame, text, default, order)
+			catObj._Elements[text] = elem
+			return elem
+		end
+
+		function catObj:AddSlider(text, min, max, default)
+			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
+			local elem = createSlider(catFrame, text, min, max, default, order)
 			catObj._Elements[text] = elem
 			return elem
 		end
@@ -714,7 +847,9 @@ function Library.new(options)
 
 		function catObj:AddLabel(text)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
-			return createLabel(catFrame, text, order)
+			local elem = createLabel(catFrame, text, order)
+			catObj._Elements[text] = elem
+			return elem
 		end
 
 		function catObj:AddImage(image, size)
@@ -752,6 +887,7 @@ function Library.new(options)
 		Tab._CleanupFunc = nil
 
 		local pageOrder = 0
+		local catOrder = 0
 
 		local btn = new("TextButton", {
 			Name = name,
@@ -778,16 +914,10 @@ function Library.new(options)
 
 		local page = new("Frame", {
 			Name = name,
-			Size = UDim2.new(1, 0, 0, 0),
+			Size = UDim2.new(1, 0, 1, 0),
 			BackgroundTransparency = 1,
-			AutomaticSize = Enum.AutomaticSize.Y,
 			Visible = false,
 			Parent = ContentScroll,
-		})
-		new("UIListLayout", {
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 5),
-			Parent = page,
 		})
 
 		btn.MouseButton1Click:Connect(function()
@@ -797,72 +927,87 @@ function Library.new(options)
 		Lib._SidebarBtns[name] = btn
 		Lib._Pages[name] = page
 		Lib._Tabs[name] = Tab
+		Lib._CatBtns[name] = {}
+		Lib._CatPages[name] = {}
 
-		--// Category
+		--// Category - creates a sidebar sub-button and a content page
 		function Tab:AddCategory(catName)
-			pageOrder = pageOrder + 1
+			catOrder = catOrder + 1
 			local Cat = {}
 
-			local catFrame = new("Frame", {
+			local catPage = new("Frame", {
 				Name = catName,
-				Size = UDim2.new(1, 0, 0, 0),
+				Size = UDim2.new(1, 0, 1, 0),
 				BackgroundTransparency = 1,
-				AutomaticSize = Enum.AutomaticSize.Y,
-				LayoutOrder = pageOrder,
+				Visible = false,
 				Parent = page,
 			})
 			new("UIListLayout", {
 				SortOrder = Enum.SortOrder.LayoutOrder,
 				Padding = UDim.new(0, 5),
-				Parent = catFrame,
+				Parent = catPage,
+			})
+			new("UIPadding", {
+				PaddingBottom = UDim.new(0, 12),
+				Parent = catPage,
 			})
 
-			pageOrder = pageOrder + 1
-			local catHeader = new("Frame", {
-				Size = UDim2.new(1, 0, 0, 36),
-				BackgroundColor3 = Color3.new(T.Accent.R * 0.25, T.Accent.G * 0.25, T.Accent.B * 0.25),
+			local catBtn = new("TextButton", {
+				Name = name .. "/" .. catName,
+				Size = UDim2.new(1, -10, 0, 32),
+				BackgroundColor3 = T.Sidebar,
 				BorderSizePixel = 0,
-				LayoutOrder = pageOrder,
-				Parent = catFrame,
-			})
-			new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = catHeader })
-			new("TextLabel", {
-				Size = UDim2.new(1, -12, 1, 0),
-				Position = UDim2.new(0, 12, 0, 0),
-				BackgroundTransparency = 1,
-				Text = catName,
-				TextColor3 = T.Accent,
-				TextSize = 14,
-				Font = Enum.Font.GothamBold,
+				Text = "     " .. catName,
+				TextColor3 = T.TextDim,
+				TextSize = 13,
+				Font = Enum.Font.Gotham,
 				TextXAlignment = Enum.TextXAlignment.Left,
-				Parent = catHeader,
+				LayoutOrder = tabOrder + 0.5 + catOrder * 0.001,
+				Visible = false,
+				AutoButtonColor = false,
+				Parent = TabsScroll,
 			})
+			new("UICorner", { CornerRadius = UDim.new(0, 6), Parent = catBtn })
 
-			buildCategory(Cat, catFrame, Tab)
+			catBtn.MouseEnter:Connect(function()
+				if Lib._ActiveCat[name] ~= catName then catBtn.BackgroundColor3 = T.SideHov end
+			end)
+			catBtn.MouseLeave:Connect(function()
+				if Lib._ActiveCat[name] ~= catName then catBtn.BackgroundColor3 = T.Sidebar end
+			end)
+
+			Lib._CatBtns[name][catName] = catBtn
+			Lib._CatPages[name][catName] = catPage
+
+			catBtn.MouseButton1Click:Connect(function()
+				Lib:SelectCategory(name, catName)
+			end)
+
+			buildCategory(Cat, catPage, Tab)
 			table.insert(Tab._Categories, Cat)
 			return Cat
 		end
 
-		--// NoCategory
+		--// NoCategory - puts elements directly on the tab page
 		function Tab:NoCategory()
-			pageOrder = pageOrder + 1
 			local Cat = {}
-
-			local catFrame = new("Frame", {
+			local catPage = new("Frame", {
 				Name = "__nocat__",
-				Size = UDim2.new(1, 0, 0, 0),
+				Size = UDim2.new(1, 0, 1, 0),
 				BackgroundTransparency = 1,
-				AutomaticSize = Enum.AutomaticSize.Y,
-				LayoutOrder = pageOrder,
+				Visible = true,
 				Parent = page,
 			})
 			new("UIListLayout", {
 				SortOrder = Enum.SortOrder.LayoutOrder,
-				Padding = UDim.new(0, 4),
-				Parent = catFrame,
+				Padding = UDim.new(0, 5),
+				Parent = catPage,
 			})
-
-			buildCategory(Cat, catFrame, Tab)
+			new("UIPadding", {
+				PaddingBottom = UDim.new(0, 12),
+				Parent = catPage,
+			})
+			buildCategory(Cat, catPage, Tab)
 			table.insert(Tab._Categories, Cat)
 			return Cat
 		end
@@ -881,6 +1026,15 @@ function Library.new(options)
 					Lib._Heartbeats[id] = nil
 				end
 			end
+			-- Destroy category buttons
+			if Lib._CatBtns[name] then
+				for _, catBtn in pairs(Lib._CatBtns[name]) do
+					catBtn:Destroy()
+				end
+				Lib._CatBtns[name] = nil
+			end
+			Lib._CatPages[name] = nil
+			Lib._ActiveCat[name] = nil
 			if page then page:Destroy() end
 			if btn then btn:Destroy() end
 			Lib._SidebarBtns[name] = nil
@@ -897,6 +1051,23 @@ function Library.new(options)
 		end
 	end
 
+	function Lib:SelectCategory(tabName, catName)
+		if not Lib._CatPages[tabName] then return end
+		for cn, cp in pairs(Lib._CatPages[tabName]) do
+			cp.Visible = (cn == catName)
+		end
+		for cn, cb in pairs(Lib._CatBtns[tabName]) do
+			if cn == catName then
+				cb.BackgroundColor3 = T.SideSel
+				cb.TextColor3 = T.Text
+			else
+				cb.BackgroundColor3 = T.Sidebar
+				cb.TextColor3 = T.TextDim
+			end
+		end
+		Lib._ActiveCat[tabName] = catName
+	end
+
 	function Lib:SelectTab(name)
 		for _, page in pairs(Lib._Pages) do
 			page.Visible = false
@@ -906,12 +1077,33 @@ function Library.new(options)
 				btn.BackgroundColor3 = T.Sidebar
 			end
 		end
+		-- Hide all category buttons
+		for tabName, cats in pairs(Lib._CatBtns) do
+			for _, catBtn in pairs(cats) do
+				catBtn.Visible = false
+			end
+		end
 		Lib._ActiveTab = name
 		if Lib._SidebarBtns[name] then
 			Lib._SidebarBtns[name].BackgroundColor3 = T.SideSel
 		end
 		if Lib._Pages[name] then
 			Lib._Pages[name].Visible = true
+		end
+		-- Show category buttons for this tab
+		if Lib._CatBtns[name] then
+			for catName, catBtn in pairs(Lib._CatBtns[name]) do
+				catBtn.Visible = true
+			end
+			-- Auto-select first category if none active
+			if not Lib._ActiveCat[name] or not Lib._CatPages[name][Lib._ActiveCat[name]] then
+				local firstCatName = next(Lib._CatBtns[name])
+				if firstCatName then
+					Lib:SelectCategory(name, firstCatName)
+				end
+			else
+				Lib:SelectCategory(name, Lib._ActiveCat[name])
+			end
 		end
 	end
 
