@@ -13,7 +13,6 @@ function EspLibrary.new()
 	Esp._AllObjects = {}
 	Esp._UpdateConn = nil
 
-	--// Update Loop
 	local function updateBox(obj, cat)
 		if not obj._Position then return end
 
@@ -84,8 +83,33 @@ function EspLibrary.new()
 		end
 	end
 
+	local function updateHighlight(obj, cat)
+		if not obj._TargetPart or not obj._Highlight then return end
+		local partOk = obj._TargetPart.Parent ~= nil
+		local shouldShow = cat._Visible and obj._ShouldShow and partOk
+		obj._Highlight.Enabled = shouldShow
+
+		if obj._TextLabel then
+			if shouldShow then
+				local sp, onScreen = Camera:WorldToViewportPoint(obj._TargetPart.Position + Vector3.new(0, 2, 0))
+				if onScreen then
+					obj._TextLabel.Position = Vector2.new(sp.X, sp.Y)
+					obj._TextLabel.Visible = true
+				else
+					obj._TextLabel.Visible = false
+				end
+			else
+				obj._TextLabel.Visible = false
+			end
+		end
+	end
+
 	--// Category
 	function Esp:Category(name)
+		if Esp._Categories[name] then
+			return Esp._Categories[name]
+		end
+
 		local Cat = {}
 		Cat._Name = name
 		Cat._Objects = {}
@@ -104,6 +128,9 @@ function EspLibrary.new()
 				end
 				if obj._Drawing then
 					obj._Drawing.Visible = false
+				end
+				if obj._Highlight then
+					obj._Highlight.Enabled = false
 				end
 			end
 		end
@@ -152,6 +179,14 @@ function EspLibrary.new()
 
 			function Box:SetVisible(v)
 				Box._ShouldShow = v
+				if not v then
+					for _, line in Box._Lines do
+						line.Visible = false
+					end
+					if Box._TextLabel then
+						Box._TextLabel.Visible = false
+					end
+				end
 			end
 
 			function Box:SetTransparency(t)
@@ -192,7 +227,10 @@ function EspLibrary.new()
 			function Txt:SetPosition(pos) Txt._Position = pos end
 			function Txt:SetText(t) Txt._Drawing.Text = tostring(t) end
 			function Txt:SetColor(c) Txt._Drawing.Color = c end
-			function Txt:SetVisible(v) Txt._ShouldShow = v end
+			function Txt:SetVisible(v)
+				Txt._ShouldShow = v
+				if not v then Txt._Drawing.Visible = false end
+			end
 			function Txt:Destroy() Txt._Drawing:Remove() end
 
 			table.insert(Cat._Objects, Txt)
@@ -211,15 +249,18 @@ function EspLibrary.new()
 			HighlightObj._Transparency = options.Transparency or 0.5
 
 			local hl = Instance.new("Highlight")
+			hl.Name = "ChipEsp_Highlight"
 			hl.Adornee = HighlightObj._TargetPart
 			hl.FillColor = HighlightObj._FillColor
 			hl.OutlineColor = HighlightObj._BorderColor
 			hl.FillTransparency = HighlightObj._Transparency
+			hl.OutlineTransparency = 0
 			hl.Enabled = true
 			hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-			hl.Parent = workspace
+			hl.Parent = HighlightObj._TargetPart.Parent or workspace
 			HighlightObj._Highlight = hl
 
+			HighlightObj._TextLabel = nil
 			if HighlightObj._ShowText then
 				local txt = Drawing.new("Text")
 				txt.Visible = false
@@ -238,7 +279,7 @@ function EspLibrary.new()
 					HighlightObj._Highlight.Enabled = v
 				end
 				if HighlightObj._TextLabel then
-					HighlightObj._TextLabel.Visible = false
+					HighlightObj._TextLabel.Visible = v
 				end
 			end
 
@@ -259,9 +300,11 @@ function EspLibrary.new()
 			function HighlightObj:Destroy()
 				if HighlightObj._Highlight then
 					HighlightObj._Highlight:Destroy()
+					HighlightObj._Highlight = nil
 				end
 				if HighlightObj._TextLabel then
 					HighlightObj._TextLabel:Remove()
+					HighlightObj._TextLabel = nil
 				end
 			end
 
@@ -275,36 +318,19 @@ function EspLibrary.new()
 	end
 
 	--// Render loop
-	local function updateHighlight(obj, cat)
-		if not obj._TargetPart then return end
-		local visible = cat._Visible and obj._ShouldShow and obj._Highlight and obj._Highlight.Adornee and obj._Highlight.Adornee.Parent ~= nil
-		if obj._Highlight then
-			obj._Highlight.Enabled = visible
-		end
-		if obj._TextLabel and visible then
-			local pos = obj._TargetPart.Position
-			local sp, onScreen = Camera:WorldToViewportPoint(pos + Vector3.new(0, 2, 0))
-			if onScreen then
-				obj._TextLabel.Position = Vector2.new(sp.X, sp.Y)
-				obj._TextLabel.Visible = true
-			else
-				obj._TextLabel.Visible = false
-			end
-		elseif obj._TextLabel then
-			obj._TextLabel.Visible = false
-		end
-	end
-
 	Esp._UpdateConn = RunService.RenderStepped:Connect(function()
 		Camera = workspace.CurrentCamera
-		for _, entry in Esp._AllObjects do
-			if entry.kind == "box" then
-				pcall(updateBox, entry.obj, entry.cat)
-			elseif entry.kind == "text" then
-				pcall(updateText, entry.obj, entry.cat)
-			elseif entry.kind == "highlight" then
-				pcall(updateHighlight, entry.obj, entry.cat)
-			end
+		for i = 1, #Esp._AllObjects do
+			local entry = Esp._AllObjects[i]
+			local ok, err = pcall(function()
+				if entry.kind == "box" then
+					updateBox(entry.obj, entry.cat)
+				elseif entry.kind == "text" then
+					updateText(entry.obj, entry.cat)
+				elseif entry.kind == "highlight" then
+					updateHighlight(entry.obj, entry.cat)
+				end
+			end)
 		end
 	end)
 

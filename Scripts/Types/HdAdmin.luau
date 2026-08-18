@@ -1,22 +1,19 @@
--- Cart Ride Script
+-- HD Admin Script
 
-local Window, Esp = ... -- Get APIs via VarArgs
+local Window, Esp = ...
 
 local Player = game:GetService("Players").LocalPlayer
 
-local Tab = Window:TypeTab("HD Admin Game") -- Spawn a Tab for the Game Type
-
-local CatTab = Tab:NoCategory() -- Some scripts may not need Categories, so, for this, we just do "NoCategory"
+local Tab = Window:TypeTab("HD Admin Game")
+local CatTab = Tab:NoCategory()
 
 local JailCat = Esp:Category("JailCells")
 local highlights = {}
+local lastToggle = false
 
 local toggle = CatTab:AddLoopingToggle("Show Jail Owners", function()
-	-- Clean up existing first
-	for _, h in pairs(highlights) do
-		if h.Destroy then h:Destroy() end
-	end
-	highlights = {}
+	if lastToggle then return end
+	lastToggle = true
 
 	for _, v in pairs(game.Workspace:GetChildren()) do
 		if v.Name:match("s JailCell$") and v:IsA("BasePart") then
@@ -31,6 +28,7 @@ local toggle = CatTab:AddLoopingToggle("Show Jail Owners", function()
 		end
 	end
 end, function(value)
+	lastToggle = false
 	for _, h in pairs(highlights) do
 		if h.Destroy then h:Destroy() end
 	end
@@ -38,6 +36,7 @@ end, function(value)
 end)
 
 Tab:Cleanup(function()
+	lastToggle = false
 	for _, h in pairs(highlights) do
 		if h.Destroy then h:Destroy() end
 	end
