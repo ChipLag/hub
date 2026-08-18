@@ -154,45 +154,47 @@ end)
 do
 	local frame = HomeCat:AddFrame(UDim2.new(1, 0, 0.5, -4))
 	frame.BackgroundColor3 = Color3.fromRGB(36, 38, 52)
+	frame.BackgroundTransparency = 0
 	frame.ClipsDescendants = true
 	local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 10); corner.Parent = frame
 
 	if playerThumb ~= "" then
 		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0.35, 0, 1, 0)
-		img.Position = UDim2.new(0, 0, 0, 0)
+		img.Size = UDim2.new(0, 64, 0, 64)
+		img.Position = UDim2.new(0, 16, 0.5, -32)
 		img.BackgroundTransparency = 1
 		img.Image = playerThumb
 		img.ScaleType = Enum.ScaleType.Crop
 		img.Parent = frame
+		local imgCorner = Instance.new("UICorner"); imgCorner.CornerRadius = UDim.new(0, 8); imgCorner.Parent = img
 	end
 
 	local textContainer = Instance.new("Frame")
-	textContainer.Size = UDim2.new(1, playerThumb ~= "" and -140 or -28, 1, 0)
-	textContainer.Position = UDim2.new(0, playerThumb ~= "" and 140 or 14, 0, 0)
+	textContainer.Size = UDim2.new(1, playerThumb ~= "" and -104 or -40, 1, 0)
+	textContainer.Position = UDim2.new(0, playerThumb ~= "" and 88 or 20, 0, 0)
 	textContainer.BackgroundTransparency = 1
 	textContainer.Parent = frame
 
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 16)
-	padding.PaddingBottom = UDim.new(0, 16)
-	padding.PaddingLeft = UDim.new(0, 4)
+	padding.PaddingTop = UDim.new(0, 14)
+	padding.PaddingBottom = UDim.new(0, 14)
+	padding.PaddingLeft = UDim.new(0, 8)
 	padding.PaddingRight = UDim.new(0, 8)
 	padding.Parent = textContainer
 
 	local layout = Instance.new("UIListLayout")
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.VerticalAlignment = Enum.VerticalAlignment.Center
-	layout.Padding = UDim.new(0, 4)
+	layout.Padding = UDim.new(0, 2)
 	layout.Parent = textContainer
 
 	local welcomeLabel = Instance.new("TextLabel")
 	welcomeLabel.Size = UDim2.new(1, 0, 0, 0)
 	welcomeLabel.AutomaticSize = Enum.AutomaticSize.Y
 	welcomeLabel.BackgroundTransparency = 1
-	welcomeLabel.Text = "Welcome, " .. Player.DisplayName .. "!"
+	welcomeLabel.Text = "Hello, " .. Player.DisplayName .. "!"
 	welcomeLabel.TextColor3 = Color3.fromRGB(230, 232, 240)
-	welcomeLabel.TextSize = 22
+	welcomeLabel.TextSize = 18
 	welcomeLabel.Font = Enum.Font.GothamBold
 	welcomeLabel.TextXAlignment = Enum.TextXAlignment.Left
 	welcomeLabel.TextWrapped = true
@@ -204,7 +206,7 @@ do
 	subLabel.BackgroundTransparency = 1
 	subLabel.Text = "ChipLag Hub"
 	subLabel.TextColor3 = Color3.fromRGB(140, 145, 165)
-	subLabel.TextSize = 16
+	subLabel.TextSize = 14
 	subLabel.Font = Enum.Font.Gotham
 	subLabel.TextXAlignment = Enum.TextXAlignment.Left
 	subLabel.TextWrapped = true
@@ -215,36 +217,38 @@ end
 do
 	local frame = HomeCat:AddFrame(UDim2.new(1, 0, 0.5, -4))
 	frame.BackgroundColor3 = Color3.fromRGB(36, 38, 52)
+	frame.BackgroundTransparency = 0
 	frame.ClipsDescendants = true
 	local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 10); corner.Parent = frame
 
 	if gameThumb ~= "" then
 		local img = Instance.new("ImageLabel")
-		img.Size = UDim2.new(0.35, 0, 1, 0)
-		img.Position = UDim2.new(0, 0, 0, 0)
+		img.Size = UDim2.new(0, 64, 0, 64)
+		img.Position = UDim2.new(0, 16, 0.5, -32)
 		img.BackgroundTransparency = 1
 		img.Image = gameThumb
 		img.ScaleType = Enum.ScaleType.Crop
 		img.Parent = frame
+		local imgCorner = Instance.new("UICorner"); imgCorner.CornerRadius = UDim.new(0, 8); imgCorner.Parent = img
 	end
 
 	local textContainer = Instance.new("Frame")
-	textContainer.Size = UDim2.new(1, gameThumb ~= "" and -140 or -28, 1, 0)
-	textContainer.Position = UDim2.new(0, gameThumb ~= "" and 140 or 14, 0, 0)
+	textContainer.Size = UDim2.new(1, gameThumb ~= "" and -104 or -40, 1, 0)
+	textContainer.Position = UDim2.new(0, gameThumb ~= "" and 88 or 20, 0, 0)
 	textContainer.BackgroundTransparency = 1
 	textContainer.Parent = frame
 
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 16)
-	padding.PaddingBottom = UDim.new(0, 16)
-	padding.PaddingLeft = UDim.new(0, 4)
+	padding.PaddingTop = UDim.new(0, 14)
+	padding.PaddingBottom = UDim.new(0, 14)
+	padding.PaddingLeft = UDim.new(0, 8)
 	padding.PaddingRight = UDim.new(0, 8)
 	padding.Parent = textContainer
 
 	local layout = Instance.new("UIListLayout")
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.VerticalAlignment = Enum.VerticalAlignment.Center
-	layout.Padding = UDim.new(0, 4)
+	layout.Padding = UDim.new(0, 2)
 	layout.Parent = textContainer
 
 	local titleLabel = Instance.new("TextLabel")
@@ -253,7 +257,7 @@ do
 	titleLabel.BackgroundTransparency = 1
 	titleLabel.Text = GameName
 	titleLabel.TextColor3 = Color3.fromRGB(230, 232, 240)
-	titleLabel.TextSize = 22
+	titleLabel.TextSize = 18
 	titleLabel.Font = Enum.Font.GothamBold
 	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	titleLabel.TextWrapped = true
@@ -265,7 +269,7 @@ do
 	gsLabel2.BackgroundTransparency = 1
 	gsLabel2.Text = "GameScript: None"
 	gsLabel2.TextColor3 = Color3.fromRGB(140, 145, 165)
-	gsLabel2.TextSize = 16
+	gsLabel2.TextSize = 14
 	gsLabel2.Font = Enum.Font.Gotham
 	gsLabel2.TextXAlignment = Enum.TextXAlignment.Left
 	gsLabel2.TextWrapped = true
@@ -277,7 +281,7 @@ do
 	typesLabel2.BackgroundTransparency = 1
 	typesLabel2.Text = "Generic Scripts: 0 loaded"
 	typesLabel2.TextColor3 = Color3.fromRGB(140, 145, 165)
-	typesLabel2.TextSize = 16
+	typesLabel2.TextSize = 14
 	typesLabel2.Font = Enum.Font.Gotham
 	typesLabel2.TextXAlignment = Enum.TextXAlignment.Left
 	typesLabel2.TextWrapped = true
