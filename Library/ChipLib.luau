@@ -940,7 +940,7 @@ function Library.new(options)
 
 		function catObj:AddFrame(size)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
-			local frame = new("Frame", {
+			local frame = new("CanvasGroup", {
 				Size = size or UDim2.new(1, 0, 0, 80),
 				BackgroundTransparency = 1,
 				BorderSizePixel = 0,

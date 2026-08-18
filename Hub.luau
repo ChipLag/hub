@@ -169,8 +169,8 @@ do
 	end
 
 	local textContainer = Instance.new("Frame")
-	textContainer.Size = UDim2.new(1, playerThumb ~= "" and -130 or -40, 1, 0)
-	textContainer.Position = UDim2.new(0, playerThumb ~= "" and 110 or 20, 0, 0)
+	textContainer.Size = UDim2.new(0.67, 0, 1, 0)
+	textContainer.Position = UDim2.new(0.33, 0, 0, 0)
 	textContainer.BackgroundTransparency = 1
 	textContainer.Parent = frame
 
@@ -231,8 +231,8 @@ do
 	end
 
 	local textContainer = Instance.new("Frame")
-	textContainer.Size = UDim2.new(1, gameThumb ~= "" and -130 or -40, 1, 0)
-	textContainer.Position = UDim2.new(0, gameThumb ~= "" and 110 or 20, 0, 0)
+	textContainer.Size = UDim2.new(0.67, 0, 1, 0)
+	textContainer.Position = UDim2.new(0.33, 0, 0, 0)
 	textContainer.BackgroundTransparency = 1
 	textContainer.Parent = frame
 
