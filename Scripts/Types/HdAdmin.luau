@@ -11,7 +11,7 @@ local CatTab = Tab:NoCategory() -- Some scripts may not need Categories, so, for
 local JailCat = Esp:Category("JailCells")
 local highlights = {}
 
-local toggle = Tab:AddLoopingToggle("Show Jail Owners", function()
+local toggle = CatTab:AddLoopingToggle("Show Jail Owners", function()
 	-- Clean up existing first
 	for _, h in pairs(highlights) do
 		if h.Destroy then h:Destroy() end
