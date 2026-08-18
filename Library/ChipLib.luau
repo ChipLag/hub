@@ -81,16 +81,32 @@ function Library.new(options)
 		Parent = getUIParent(),
 	})
 
-	--// Main Frame
-	Lib.Main = new("Frame", {
-		Name = "Main",
+	--// Backdrop (full-screen dim behind the panel)
+	local Backdrop = new("Frame", {
+		Name = "Backdrop",
 		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundColor3 = T.Bg,
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.4,
 		BorderSizePixel = 0,
+		Visible = false,
 		Parent = Lib.Gui,
 	})
 
-	local SidebarW = isMobile() and 220 or 250
+	--// Main Frame (centered panel)
+	Lib.Main = new("Frame", {
+		Name = "Main",
+		Size = UDim2.new(0, isMobile() and 360 or 700, 0, isMobile() and 520 or 500),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = T.Bg,
+		BorderSizePixel = 0,
+		Visible = false,
+		Parent = Lib.Gui,
+	})
+	new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = Lib.Main })
+	new("UIStroke", { Color = T.Border, Thickness = 1, Parent = Lib.Main })
+
+	local SidebarW = isMobile() and 110 or 180
 
 	--// Sidebar
 	local Sidebar = new("Frame", {
@@ -115,7 +131,7 @@ function Library.new(options)
 	--// Tabs Scroll
 	local TabsScroll = new("ScrollingFrame", {
 		Name = "Tabs",
-		Size = UDim2.new(1, 0, 1, -8),
+		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundTransparency = 1,
 		ScrollBarThickness = 3,
 		ScrollBarImageColor3 = T.Accent,
@@ -137,8 +153,8 @@ function Library.new(options)
 	--// Content
 	Lib.Content = new("Frame", {
 		Name = "Content",
-		Size = UDim2.new(1, -SidebarW, 1, 0),
-		Position = UDim2.new(0, SidebarW, 0, 0),
+		Size = UDim2.new(1, -SidebarW - 1, 1, 0),
+		Position = UDim2.new(0, SidebarW + 1, 0, 0),
 		BackgroundColor3 = T.Content,
 		BorderSizePixel = 0,
 		Parent = Lib.Main,
@@ -166,14 +182,14 @@ function Library.new(options)
 		Parent = ContentScroll,
 	})
 
-	--// Notifications
+	--// Notifications (on ScreenGui, not inside Main)
 	local NotifHolder = new("Frame", {
 		Name = "Notifications",
-		Size = UDim2.new(0, 260, 1, 0),
+		Size = UDim2.new(0, 260, 1, -16),
 		Position = UDim2.new(1, -270, 0, 8),
 		BackgroundTransparency = 1,
 		ZIndex = 100,
-		Parent = Lib.Main,
+		Parent = Lib.Gui,
 	})
 	new("UIListLayout", {
 		SortOrder = Enum.SortOrder.LayoutOrder,
@@ -908,17 +924,30 @@ function Library.new(options)
 
 	function Lib:Show()
 		Lib.Main.Visible = true
+		Backdrop.Visible = true
 		Lib._Visible = true
 	end
 
 	function Lib:Hide()
 		Lib.Main.Visible = false
+		Backdrop.Visible = false
 		Lib._Visible = false
 	end
 
 	function Lib:Toggle()
 		if Lib._Visible then Lib:Hide() else Lib:Show() end
 	end
+
+	--// ============================================================
+	--// Keybind toggle (RightControl on desktop)
+	--// ============================================================
+
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then return end
+		if input.KeyCode == Enum.KeyCode.RightControl then
+			Lib:Toggle()
+		end
+	end)
 
 	--// ============================================================
 	--// Notifications

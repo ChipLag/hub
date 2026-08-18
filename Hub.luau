@@ -72,14 +72,16 @@ local function fetchContent(path)
 	if ok and content then
 		return content
 	end
+	warn("[ChipLag] Failed to fetch: " .. path .. " - " .. tostring(content))
 	return nil
 end
 
 local function fetchScript(path)
 	local content = fetchContent(path)
 	if content then
-		local fn = loadstring(content)
+		local fn, err = loadstring(content)
 		if fn then return fn() end
+		warn("[ChipLag] Failed to compile: " .. path .. " - " .. tostring(err))
 	end
 	return nil
 end
@@ -87,10 +89,14 @@ end
 local function loadScript(path, ...)
 	local content = fetchContent(path)
 	if content then
-		local fn = loadstring(content)
-		if fn then return fn(...) end
+		local fn, err = loadstring(content)
+		if fn then
+			return fn(...)
+		else
+			error("Loadstring failed: " .. tostring(err))
+		end
 	end
-	return nil
+	error("Fetch failed: " .. path)
 end
 
 --// ============================================================
@@ -144,9 +150,11 @@ if TypeRegistry then
 			if state then
 				local ok, err = pcall(loadScript, "Scripts/Types/" .. fileName .. ".luau", Window, Esp)
 				if not ok then
-					Window:Notify("Failed to load: " .. displayName .. " - " .. tostring(err), 4)
+					warn("[ChipLag] Type load failed (" .. displayName .. "): " .. tostring(err))
+					Window:Notify("Failed: " .. displayName .. " - " .. tostring(err), 5)
+				else
+					LoadedTypes[displayName] = true
 				end
-				LoadedTypes[displayName] = true
 			else
 				for tabName, tab in pairs(Window._Tabs) do
 					if tabName == displayName then
@@ -176,7 +184,11 @@ end
 if GamesRegistry then
 	for _, gameId in GamesRegistry do
 		if gameId == PlaceId then
-			pcall(loadScript, "Scripts/Games/" .. tostring(gameId) .. ".luau", Window, Esp)
+			local ok, err = pcall(loadScript, "Scripts/Games/" .. tostring(gameId) .. ".luau", Window, Esp)
+			if not ok then
+				warn("[ChipLag] GameScript load failed: " .. tostring(err))
+				Window:Notify("GameScript failed: " .. tostring(err), 5)
+			end
 			break
 		end
 	end

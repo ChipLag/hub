@@ -44,4 +44,6 @@ end)
 
 
 -- Type Tabs can have a cleanup script because you CAN actually disable them again!
-Tab:Cleanup(
+Tab:Cleanup(function()
+	flingToggle:Stop()
+end)
