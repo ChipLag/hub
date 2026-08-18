@@ -44,10 +44,6 @@ end
 -- Scripts call Window:TypeTab(name) -> returns a Tab
 function Window:TypeTab(name)
 	local tab = Window:AddTab(name, 30 + Hub._TypesLoaded)
-	Hub._TypesLoaded = Hub._TypesLoaded + 1
-	if Hub._TypesLabel then
-		Hub._TypesLabel:SetText("Types Loaded: " .. Hub._TypesLoaded)
-	end
 	return tab
 end
 
@@ -133,14 +129,13 @@ Hub._GsLabel = HomeCat:AddLabel("GameScript: None")
 Hub._TypesLabel = HomeCat:AddLabel("Types Loaded: 0")
 
 --// ============================================================
---// Script Types Tab
+--// Generic Scripts Tab
 -- ============================================================
 
-local TypesTab = Window:AddTab("Script Types", 2)
+local TypesTab = Window:AddTab("Generic scripts", 2)
 local TypesCat = TypesTab:AddCategory("Types")
 
 local TypeRegistry = fetchScript("Scripts/Types.luau")
-local GamesRegistry = fetchScript("Scripts/Games.luau")
 
 local LoadedTypes = {} -- name -> { tab, cleanup, toggles }
 
@@ -154,6 +149,10 @@ if TypeRegistry then
 					Window:Notify("Failed: " .. displayName .. " - " .. tostring(err), 5)
 				else
 					LoadedTypes[displayName] = true
+					Hub._TypesLoaded = Hub._TypesLoaded + 1
+					if Hub._TypesLabel then
+						Hub._TypesLabel:SetText("Types Loaded: " .. Hub._TypesLoaded)
+					end
 				end
 			else
 				for tabName, tab in pairs(Window._Tabs) do
@@ -172,25 +171,26 @@ if TypeRegistry then
 					end
 				end
 				LoadedTypes[displayName] = nil
+				Hub._TypesLoaded = Hub._TypesLoaded - 1
+				if Hub._TypesLabel then
+					Hub._TypesLabel:SetText("Types Loaded: " .. Hub._TypesLoaded)
+				end
 			end
 		end)
 	end
 end
 
 --// ============================================================
---// Game Script
---// ============================================================
+--// Game Script (direct load by PlaceId)
+-- ============================================================
 
-if GamesRegistry then
-	for _, gameId in GamesRegistry do
-		if gameId == PlaceId then
-			local ok, err = pcall(loadScript, "Scripts/Games/" .. tostring(gameId) .. ".luau", Window, Esp)
-			if not ok then
-				warn("[ChipLag] GameScript load failed: " .. tostring(err))
-				Window:Notify("GameScript failed: " .. tostring(err), 5)
-			end
-			break
-		end
+do
+	local path = "Scripts/Games/" .. tostring(PlaceId) .. ".luau"
+	local ok, err = pcall(loadScript, path, Window, Esp)
+	if ok then
+		warn("[ChipLag] Loaded GameScript for place " .. tostring(PlaceId))
+	else
+		warn("[ChipLag] No GameScript for place " .. tostring(PlaceId) .. " (" .. tostring(err) .. ")")
 	end
 end
 

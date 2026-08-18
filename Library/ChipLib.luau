@@ -38,20 +38,20 @@ function Library.new(options)
 
 	local Lib = {}
 	Lib._Theme = {
-		Bg       = Color3.fromRGB(18, 18, 24),
-		Sidebar  = Color3.fromRGB(14, 14, 20),
-		SideHov  = Color3.fromRGB(28, 28, 38),
-		SideSel  = Color3.fromRGB(38, 38, 52),
-		Content  = Color3.fromRGB(22, 22, 30),
-		Accent   = Color3.fromRGB(75, 135, 255),
-		Text     = Color3.fromRGB(215, 215, 225),
-		TextDim  = Color3.fromRGB(130, 130, 148),
-		TogOn    = Color3.fromRGB(75, 135, 255),
-		TogOff   = Color3.fromRGB(55, 55, 65),
-		Elem     = Color3.fromRGB(32, 32, 42),
-		ElemHov  = Color3.fromRGB(42, 42, 55),
-		Border   = Color3.fromRGB(38, 38, 50),
-		Notif    = Color3.fromRGB(28, 28, 38),
+		Bg       = Color3.fromRGB(22, 22, 30),
+		Sidebar  = Color3.fromRGB(16, 16, 22),
+		SideHov  = Color3.fromRGB(30, 30, 42),
+		SideSel  = Color3.fromRGB(42, 42, 58),
+		Content  = Color3.fromRGB(26, 26, 36),
+		Accent   = Color3.fromRGB(90, 150, 255),
+		Text     = Color3.fromRGB(225, 225, 235),
+		TextDim  = Color3.fromRGB(145, 145, 165),
+		TogOn    = Color3.fromRGB(90, 150, 255),
+		TogOff   = Color3.fromRGB(60, 60, 72),
+		Elem     = Color3.fromRGB(34, 34, 46),
+		ElemHov  = Color3.fromRGB(44, 44, 60),
+		Border   = Color3.fromRGB(48, 48, 64),
+		Notif    = Color3.fromRGB(30, 30, 42),
 	}
 	if options.Theme then
 		for k, v in pairs(options.Theme) do
@@ -81,21 +81,10 @@ function Library.new(options)
 		Parent = getUIParent(),
 	})
 
-	--// Backdrop (full-screen dim behind the panel)
-	local Backdrop = new("Frame", {
-		Name = "Backdrop",
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundColor3 = Color3.new(0, 0, 0),
-		BackgroundTransparency = 0.4,
-		BorderSizePixel = 0,
-		Visible = false,
-		Parent = Lib.Gui,
-	})
-
 	--// Main Frame (centered panel)
 	Lib.Main = new("Frame", {
 		Name = "Main",
-		Size = UDim2.new(0, isMobile() and 360 or 700, 0, isMobile() and 520 or 500),
+		Size = UDim2.new(0, isMobile() and 380 or 780, 0, isMobile() and 540 or 540),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = T.Bg,
@@ -103,10 +92,10 @@ function Library.new(options)
 		Visible = false,
 		Parent = Lib.Gui,
 	})
-	new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = Lib.Main })
+	new("UICorner", { CornerRadius = UDim.new(0, 10), Parent = Lib.Main })
 	new("UIStroke", { Color = T.Border, Thickness = 1, Parent = Lib.Main })
 
-	local SidebarW = isMobile() and 110 or 180
+	local SidebarW = isMobile() and 120 or 200
 
 	--// Sidebar
 	local Sidebar = new("Frame", {
@@ -117,14 +106,14 @@ function Library.new(options)
 		Parent = Lib.Main,
 	})
 	new("UIPadding", {
-		PaddingTop = UDim.new(0, 6),
-		PaddingLeft = UDim.new(0, 6),
-		PaddingRight = UDim.new(0, 6),
+		PaddingTop = UDim.new(0, 8),
+		PaddingLeft = UDim.new(0, 8),
+		PaddingRight = UDim.new(0, 8),
 		Parent = Sidebar,
 	})
 	new("UIListLayout", {
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 2),
+		Padding = UDim.new(0, 3),
 		Parent = Sidebar,
 	})
 
@@ -142,11 +131,11 @@ function Library.new(options)
 	})
 	new("UIListLayout", {
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 2),
+		Padding = UDim.new(0, 3),
 		Parent = TabsScroll,
 	})
 	new("UIPadding", {
-		PaddingBottom = UDim.new(0, 10),
+		PaddingBottom = UDim.new(0, 12),
 		Parent = TabsScroll,
 	})
 
@@ -174,19 +163,19 @@ function Library.new(options)
 	})
 	new("UIListLayout", {
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 4),
+		Padding = UDim.new(0, 5),
 		Parent = ContentScroll,
 	})
 	new("UIPadding", {
-		PaddingBottom = UDim.new(0, 10),
+		PaddingBottom = UDim.new(0, 12),
 		Parent = ContentScroll,
 	})
 
 	--// Notifications (on ScreenGui, not inside Main)
 	local NotifHolder = new("Frame", {
 		Name = "Notifications",
-		Size = UDim2.new(0, 260, 1, -16),
-		Position = UDim2.new(1, -270, 0, 8),
+		Size = UDim2.new(0, 300, 1, -16),
+		Position = UDim2.new(1, -310, 0, 8),
 		BackgroundTransparency = 1,
 		ZIndex = 100,
 		Parent = Lib.Gui,
@@ -202,14 +191,14 @@ function Library.new(options)
 	if isMobile() then
 		local ToggleBtn = new("TextButton", {
 			Name = "MobileToggle",
-			Size = UDim2.new(0, 50, 0, 50),
-			Position = UDim2.new(1, -60, 1, -70),
+			Size = UDim2.new(0, 56, 0, 56),
+			Position = UDim2.new(1, -66, 1, -76),
 			AnchorPoint = Vector2.new(0, 0),
 			BackgroundColor3 = T.Accent,
 			BorderSizePixel = 0,
-			Text = utf8.char(9776),
+			Text = ":::",
 			TextColor3 = Color3.new(1, 1, 1),
-			TextSize = 24,
+			TextSize = 18,
 			Font = Enum.Font.GothamBold,
 			ZIndex = 200,
 			Parent = Lib.Gui,
@@ -258,29 +247,29 @@ function Library.new(options)
 		local on = default or false
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 34),
+			Size = UDim2.new(1, 0, 0, 42),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = frame })
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
 
 		local label = new("TextLabel", {
-			Size = UDim2.new(1, -50, 1, 0),
-			Position = UDim2.new(0, 10, 0, 0),
+			Size = UDim2.new(1, -58, 1, 0),
+			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
 		})
 
 		local bg = new("Frame", {
-			Size = UDim2.new(0, 34, 0, 18),
-			Position = UDim2.new(1, -44, 0.5, -9),
+			Size = UDim2.new(0, 42, 0, 22),
+			Position = UDim2.new(1, -54, 0.5, -11),
 			BackgroundColor3 = on and T.TogOn or T.TogOff,
 			BorderSizePixel = 0,
 			Parent = frame,
@@ -288,8 +277,8 @@ function Library.new(options)
 		new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = bg })
 
 		local dot = new("Frame", {
-			Size = UDim2.new(0, 14, 0, 14),
-			Position = on and UDim2.new(1, -16, 0, 2) or UDim2.new(0, 2, 0, 2),
+			Size = UDim2.new(0, 18, 0, 18),
+			Position = on and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2),
 			BackgroundColor3 = T.Text,
 			BorderSizePixel = 0,
 			Parent = bg,
@@ -300,7 +289,7 @@ function Library.new(options)
 		function obj:SetValue(v)
 			on = v
 			bg.BackgroundColor3 = on and T.TogOn or T.TogOff
-			dot.Position = on and UDim2.new(1, -16, 0, 2) or UDim2.new(0, 2, 0, 2)
+			dot.Position = on and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
 		end
 		function obj:GetValue() return on end
 		function obj:SetText(t) label.Text = t end
@@ -322,19 +311,19 @@ function Library.new(options)
 
 	local function createButton(parent, text, callback, order)
 		local btn = new("TextButton", {
-			Size = UDim2.new(1, 0, 0, 34),
+			Size = UDim2.new(1, 0, 0, 42),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			Text = "   " .. text,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			LayoutOrder = order or 0,
 			AutoButtonColor = false,
 			Parent = parent,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = btn })
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = btn })
 
 		btn.MouseEnter:Connect(function() btn.BackgroundColor3 = T.ElemHov end)
 		btn.MouseLeave:Connect(function() btn.BackgroundColor3 = T.Elem end)
@@ -350,39 +339,39 @@ function Library.new(options)
 
 	local function createTextBox(parent, text, default, order)
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 34),
+			Size = UDim2.new(1, 0, 0, 42),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = frame })
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
 
 		new("TextLabel", {
-			Size = UDim2.new(0, 80, 1, 0),
-			Position = UDim2.new(0, 10, 0, 0),
+			Size = UDim2.new(0, 90, 1, 0),
+			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
 		})
 
 		local input = new("TextBox", {
-			Size = UDim2.new(1, -100, 0, 22),
-			Position = UDim2.new(0, 90, 0, 6),
+			Size = UDim2.new(1, -118, 0, 28),
+			Position = UDim2.new(0, 100, 0, 7),
 			BackgroundColor3 = T.Bg,
 			BorderSizePixel = 0,
 			Text = default or "",
 			TextColor3 = T.Text,
-			TextSize = 11,
+			TextSize = 13,
 			Font = Enum.Font.Gotham,
 			ClearTextOnFocus = false,
 			Parent = frame,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 4), Parent = input })
+		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = input })
 
 		local obj = { Value = default or "" }
 		input:GetPropertyChangedSignal("Text"):Connect(function()
@@ -397,21 +386,21 @@ function Library.new(options)
 		local val = default or Vector2.new(0, 0)
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 56),
+			Size = UDim2.new(1, 0, 0, 64),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = frame })
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
 
 		new("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 18),
-			Position = UDim2.new(0, 10, 0, 0),
+			Size = UDim2.new(1, 0, 0, 22),
+			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
@@ -419,33 +408,33 @@ function Library.new(options)
 
 		local function makeAxis(label, xPos, defaultVal)
 			new("TextLabel", {
-				Size = UDim2.new(0, 14, 0, 14),
-				Position = UDim2.new(0, xPos, 0, 24),
+				Size = UDim2.new(0, 16, 0, 16),
+				Position = UDim2.new(0, xPos, 0, 28),
 				BackgroundTransparency = 1,
 				Text = label,
 				TextColor3 = T.Accent,
-				TextSize = 11,
+				TextSize = 13,
 				Font = Enum.Font.GothamBold,
 				Parent = frame,
 			})
 			local tb = new("TextBox", {
-				Size = UDim2.new(0, 55, 0, 20),
-				Position = UDim2.new(0, xPos + 16, 0, 22),
+				Size = UDim2.new(0, 60, 0, 24),
+				Position = UDim2.new(0, xPos + 18, 0, 26),
 				BackgroundColor3 = T.Bg,
 				BorderSizePixel = 0,
 				Text = tostring(defaultVal),
 				TextColor3 = T.Text,
-				TextSize = 11,
+				TextSize = 13,
 				Font = Enum.Font.Gotham,
 				ClearTextOnFocus = false,
 				Parent = frame,
 			})
-			new("UICorner", { CornerRadius = UDim.new(0, 4), Parent = tb })
+			new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = tb })
 			return tb
 		end
 
-		local xTb = makeAxis("X", 10, val.X)
-		local yTb = makeAxis("Y", 90, val.Y)
+		local xTb = makeAxis("X", 14, val.X)
+		local yTb = makeAxis("Y", 108, val.Y)
 
 		local obj = { Value = val }
 
@@ -475,21 +464,21 @@ function Library.new(options)
 		local val = default or Vector3.new(0, 0, 0)
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 56),
+			Size = UDim2.new(1, 0, 0, 64),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = frame })
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
 
 		new("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 18),
-			Position = UDim2.new(0, 10, 0, 0),
+			Size = UDim2.new(1, 0, 0, 22),
+			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
@@ -497,34 +486,34 @@ function Library.new(options)
 
 		local function makeAxis(label, xPos, defaultVal)
 			new("TextLabel", {
-				Size = UDim2.new(0, 14, 0, 14),
-				Position = UDim2.new(0, xPos, 0, 24),
+				Size = UDim2.new(0, 16, 0, 16),
+				Position = UDim2.new(0, xPos, 0, 28),
 				BackgroundTransparency = 1,
 				Text = label,
 				TextColor3 = T.Accent,
-				TextSize = 11,
+				TextSize = 13,
 				Font = Enum.Font.GothamBold,
 				Parent = frame,
 			})
 			local tb = new("TextBox", {
-				Size = UDim2.new(0, 42, 0, 20),
-				Position = UDim2.new(0, xPos + 16, 0, 22),
+				Size = UDim2.new(0, 48, 0, 24),
+				Position = UDim2.new(0, xPos + 18, 0, 26),
 				BackgroundColor3 = T.Bg,
 				BorderSizePixel = 0,
 				Text = tostring(defaultVal),
 				TextColor3 = T.Text,
-				TextSize = 11,
+				TextSize = 13,
 				Font = Enum.Font.Gotham,
 				ClearTextOnFocus = false,
 				Parent = frame,
 			})
-			new("UICorner", { CornerRadius = UDim.new(0, 4), Parent = tb })
+			new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = tb })
 			return tb
 		end
 
-		local xTb = makeAxis("X", 10, val.X)
-		local yTb = makeAxis("Y", 82, val.Y)
-		local zTb = makeAxis("Z", 154, val.Z)
+		local xTb = makeAxis("X", 14, val.X)
+		local yTb = makeAxis("Y", 90, val.Y)
+		local zTb = makeAxis("Z", 166, val.Z)
 
 		local obj = { Value = val }
 
@@ -552,7 +541,7 @@ function Library.new(options)
 	end
 
 	local function createImage(parent, image, size, order)
-		size = size or 40
+		size = size or 48
 		local img = new("ImageLabel", {
 			Size = UDim2.new(0, size, 0, size),
 			BackgroundTransparency = 1,
@@ -560,7 +549,7 @@ function Library.new(options)
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 6), Parent = img })
+		new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = img })
 		local obj = {}
 		function obj:SetImage(imgId) img.Image = imgId end
 		return obj
@@ -568,11 +557,11 @@ function Library.new(options)
 
 	local function createLabel(parent, text, order)
 		local lbl = new("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 20),
+			Size = UDim2.new(1, 0, 0, 24),
 			BackgroundTransparency = 1,
 			Text = "  " .. text,
 			TextColor3 = T.TextDim,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			LayoutOrder = order or 0,
@@ -587,29 +576,29 @@ function Library.new(options)
 		local on = false
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 34),
+			Size = UDim2.new(1, 0, 0, 42),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
 			Parent = parent,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = frame })
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = frame })
 
 		local label = new("TextLabel", {
-			Size = UDim2.new(1, -50, 1, 0),
-			Position = UDim2.new(0, 10, 0, 0),
+			Size = UDim2.new(1, -58, 1, 0),
+			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = frame,
 		})
 
 		local bg = new("Frame", {
-			Size = UDim2.new(0, 34, 0, 18),
-			Position = UDim2.new(1, -44, 0.5, -9),
+			Size = UDim2.new(0, 42, 0, 22),
+			Position = UDim2.new(1, -54, 0.5, -11),
 			BackgroundColor3 = T.TogOff,
 			BorderSizePixel = 0,
 			Parent = frame,
@@ -617,7 +606,7 @@ function Library.new(options)
 		new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = bg })
 
 		local dot = new("Frame", {
-			Size = UDim2.new(0, 14, 0, 14),
+			Size = UDim2.new(0, 18, 0, 18),
 			Position = UDim2.new(0, 2, 0, 2),
 			BackgroundColor3 = T.Text,
 			BorderSizePixel = 0,
@@ -649,7 +638,7 @@ function Library.new(options)
 		function obj:SetValue(v)
 			on = v
 			bg.BackgroundColor3 = on and T.TogOn or T.TogOff
-			dot.Position = on and UDim2.new(1, -16, 0, 2) or UDim2.new(0, 2, 0, 2)
+			dot.Position = on and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
 			if on then
 				startLoop()
 			else
@@ -766,19 +755,19 @@ function Library.new(options)
 
 		local btn = new("TextButton", {
 			Name = name,
-			Size = UDim2.new(1, 0, 0, 32),
+			Size = UDim2.new(1, 0, 0, 38),
 			BackgroundColor3 = T.Sidebar,
 			BorderSizePixel = 0,
 			Text = "   " .. name,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			LayoutOrder = tabOrder,
 			AutoButtonColor = false,
 			Parent = TabsScroll,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = btn })
+		new("UICorner", { CornerRadius = UDim.new(0, 7), Parent = btn })
 
 		btn.MouseEnter:Connect(function()
 			if Lib._ActiveTab ~= name then btn.BackgroundColor3 = T.SideHov end
@@ -797,7 +786,7 @@ function Library.new(options)
 		})
 		new("UIListLayout", {
 			SortOrder = Enum.SortOrder.LayoutOrder,
-			Padding = UDim.new(0, 4),
+			Padding = UDim.new(0, 5),
 			Parent = page,
 		})
 
@@ -828,18 +817,18 @@ function Library.new(options)
 				Parent = catFrame,
 			})
 
-			pageOrder = pageOrder + 1
-			new("TextLabel", {
-				Size = UDim2.new(1, 0, 0, 24),
-				BackgroundTransparency = 1,
-				Text = "  " .. catName,
-				TextColor3 = T.Accent,
-				TextSize = 13,
-				Font = Enum.Font.GothamBold,
-				TextXAlignment = Enum.TextXAlignment.Left,
-				LayoutOrder = pageOrder,
-				Parent = catFrame,
-			})
+		pageOrder = pageOrder + 1
+		new("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 28),
+			BackgroundTransparency = 1,
+			Text = "  " .. catName,
+			TextColor3 = T.Accent,
+			TextSize = 15,
+			Font = Enum.Font.GothamBold,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			LayoutOrder = pageOrder,
+			Parent = catFrame,
+		})
 
 			buildCategory(Cat, catFrame, Tab)
 			table.insert(Tab._Categories, Cat)
@@ -924,13 +913,11 @@ function Library.new(options)
 
 	function Lib:Show()
 		Lib.Main.Visible = true
-		Backdrop.Visible = true
 		Lib._Visible = true
 	end
 
 	function Lib:Hide()
 		Lib.Main.Visible = false
-		Backdrop.Visible = false
 		Lib._Visible = false
 	end
 
@@ -956,12 +943,12 @@ function Library.new(options)
 	function Lib:Notify(text, duration)
 		duration = duration or 3
 		local notif = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 40),
+			Size = UDim2.new(1, 0, 0, 48),
 			BackgroundColor3 = T.Notif,
 			BorderSizePixel = 0,
 			Parent = NotifHolder,
 		})
-		new("UICorner", { CornerRadius = UDim.new(0, 6), Parent = notif })
+		new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = notif })
 		new("Frame", {
 			Size = UDim2.new(0, 3, 1, 0),
 			BackgroundColor3 = T.Accent,
@@ -969,12 +956,12 @@ function Library.new(options)
 			Parent = notif,
 		})
 		new("TextLabel", {
-			Size = UDim2.new(1, -16, 1, 0),
-			Position = UDim2.new(0, 12, 0, 0),
+			Size = UDim2.new(1, -18, 1, 0),
+			Position = UDim2.new(0, 14, 0, 0),
 			BackgroundTransparency = 1,
 			Text = text,
 			TextColor3 = T.Text,
-			TextSize = 12,
+			TextSize = 14,
 			Font = Enum.Font.Gotham,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextWrapped = true,
