@@ -1,7 +1,7 @@
 --// Hub.luau
 --// ChipLag Hub V2 - Main Orchestrator
 --// Repository: https://github.com/ChipLag/hub
-print("Hub V2 loaded - Build 2026-08-18")
+print("Hub V2.1 loaded")
 
 local repo = "https://raw.githubusercontent.com/ChipLag/hub/refs/heads/main/"
 
@@ -23,6 +23,7 @@ local Window = ChipLib.new({ Name = "ChipLag Hub" })
 local Esp = ChipEsp.new()
 
 Window._Esp = Esp
+Window.Settings = { TargetFriends = false }
 
 --// ============================================================
 --// Hub State
@@ -68,6 +69,36 @@ local function saveEnabledTypes(types)
 end
 
 local SavedTypes = loadSavedTypes()
+
+local function getSettingsPath()
+	return "ChipLag/Settings.json"
+end
+
+local function loadSettings()
+	local ok, content = pcall(function()
+		if readfile and isfile then
+			local path = getSettingsPath()
+			if isfile(path) then
+			return HttpService:JSONDecode(readfile(path))
+			end
+		end
+	end)
+	if ok and type(content) == "table" then
+		return content
+	end
+	return {}
+end
+
+local function saveSettings(settings)
+	pcall(function()
+		if writefile then
+			writefile(getSettingsPath(), HttpService:JSONEncode(settings))
+		end
+	end)
+end
+
+local SavedSettings = loadSettings()
+Window.Settings.TargetFriends = SavedSettings.TargetFriends == true
 
 --// ============================================================
 --// Extend Window with script-specific API
@@ -288,6 +319,21 @@ do
 
 	Hub._GsCard = { SetSubtitle = function(_, s) gsLabel2.Text = s end }
 	Hub._TypesCard = { SetFooter = function(_, f) typesLabel2.Text = f end }
+end
+
+--// ============================================================
+--// Options Tab
+--// ============================================================
+
+do
+	local OptionsTab = Window:AddTab("Options", 99)
+	local OptionsCat = OptionsTab:AddCategory("Settings")
+
+	OptionsCat:AddToggle("Target Friends", Window.Settings.TargetFriends == true, function(state)
+		Window.Settings.TargetFriends = state
+		SavedSettings.TargetFriends = state
+		saveSettings(SavedSettings)
+	end)
 end
 
 --// ============================================================
