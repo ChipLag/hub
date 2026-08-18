@@ -592,7 +592,7 @@ function Library.new(options)
 		local val = default or Vector3.new(0, 0, 0)
 
 		local frame = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 64),
+			Size = UDim2.new(1, 0, 0, 88),
 			BackgroundColor3 = T.Elem,
 			BorderSizePixel = 0,
 			LayoutOrder = order or 0,
@@ -663,6 +663,34 @@ function Library.new(options)
 		xTb:GetPropertyChangedSignal("Text"):Connect(update)
 		yTb:GetPropertyChangedSignal("Text"):Connect(update)
 		zTb:GetPropertyChangedSignal("Text"):Connect(update)
+
+		local function makeSmallBtn(label, xPos, callback)
+			local btn = new("TextButton", {
+				Size = UDim2.new(0, 80, 0, 24),
+				Position = UDim2.new(0, xPos, 0, 58),
+				BackgroundColor3 = T.Bg,
+				BorderSizePixel = 0,
+				Text = label,
+				TextColor3 = T.Text,
+				TextSize = 13,
+				Font = Enum.Font.Gotham,
+				Parent = frame,
+			})
+			new("UICorner", { CornerRadius = UDim.new(0, 5), Parent = btn })
+			btn.MouseButton1Click:Connect(callback)
+		end
+
+		makeSmallBtn("Set here", 14, function()
+			local char = game:GetService("Players").LocalPlayer.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				local pos = char.HumanoidRootPart.Position
+				obj:SetValue(Vector3.new(math.round(pos.X), math.round(pos.Y), math.round(pos.Z)))
+			end
+		end)
+
+		makeSmallBtn("Set null", 100, function()
+			obj:SetValue(Vector3.new(2000000, 2000000, 2000000))
+		end)
 
 		return obj
 	end
