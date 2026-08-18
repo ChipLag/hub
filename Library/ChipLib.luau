@@ -86,7 +86,7 @@ function Library.new(options)
 	})
 
 	--// Main Frame (centered panel)
-	Lib.Main = new("Frame", {
+	Lib.Main = new("CanvasGroup", {
 		Name = "Main",
 		Size = UDim2.new(0.55, 0, 0.55, 0),
 		Position = UDim2.new(0.5, 0, 0.5, 0),

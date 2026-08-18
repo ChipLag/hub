@@ -370,6 +370,29 @@ task.defer(function()
 end)
 
 --// ============================================================
+--// Misc Tab
+--// ============================================================
+
+do
+	local MiscTab = Window:AddTab("Misc.", 25)
+	local MiscCat = MiscTab:AddCategory("Scripts")
+
+	local MiscRegistry = fetchScript("Scripts/Misc.luau")
+	if MiscRegistry then
+		for displayName, url in pairs(MiscRegistry) do
+			MiscCat:AddButton(displayName, function()
+				local ok, err = pcall(function()
+					loadstring(game:HttpGet(url, true))()
+				end)
+				if not ok then
+					Window:Notification(3, "Failed: " .. tostring(err))
+				end
+			end)
+		end
+	end
+end
+
+--// ============================================================
 --// Game Script (direct load by PlaceId)
 --// ============================================================
 
