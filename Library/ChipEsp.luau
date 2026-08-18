@@ -1,107 +1,36 @@
 --// ChipEsp.luau
---// Generic ESP Drawing Library for ChipLag Hub V2
+--// Instance-based ESP Library (no Drawing API required)
 
-local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
 
 local EspLibrary = {}
 
 function EspLibrary.new()
 	local Esp = {}
 	Esp._Categories = {}
-	Esp._AllObjects = {}
-	Esp._UpdateConn = nil
 
-	local function updateBox(obj, cat)
-		if not obj._Position then return end
+	local function makeBillboard(parent, text, color, offset)
+		local bb = Instance.new("BillboardGui")
+		bb.Name = "ChipEsp_Text"
+		bb.Size = UDim2.new(0, 200, 0, 50)
+		bb.StudsOffset = offset or Vector3.new(0, 2, 0)
+		bb.AlwaysOnTop = true
+		bb.MaxDistance = 1000
+		bb.Adornee = parent
+		bb.Parent = parent
 
-		local pos = obj._Position
-		local size = obj._Size
-		local half = size * 0.5
+		local tl = Instance.new("TextLabel")
+		tl.Size = UDim2.new(1, 0, 1, 0)
+		tl.BackgroundTransparency = 1
+		tl.Text = tostring(text or "")
+		tl.TextColor3 = color or Color3.new(1, 1, 1)
+		tl.TextSize = 14
+		tl.Font = Enum.Font.GothamBold
+		tl.TextStrokeTransparency = 0.5
+		tl.TextStrokeColor3 = Color3.new(0, 0, 0)
+		tl.Parent = bb
 
-		local corners3D = {
-			pos + Vector3.new(-half.X, -half.Y, -half.Z),
-			pos + Vector3.new( half.X, -half.Y, -half.Z),
-			pos + Vector3.new( half.X,  half.Y, -half.Z),
-			pos + Vector3.new(-half.X,  half.Y, -half.Z),
-			pos + Vector3.new(-half.X, -half.Y,  half.Z),
-			pos + Vector3.new( half.X, -half.Y,  half.Z),
-			pos + Vector3.new( half.X,  half.Y,  half.Z),
-			pos + Vector3.new(-half.X,  half.Y,  half.Z),
-		}
-
-		local projected = {}
-		local anyOnScreen = false
-		for i, c in corners3D do
-			local sp, onScreen = Camera:WorldToViewportPoint(c)
-			projected[i] = Vector2.new(sp.X, sp.Y)
-			if onScreen then anyOnScreen = true end
-		end
-
-		local visible = cat._Visible and obj._ShouldShow and anyOnScreen
-
-		local edges = {
-			{1,2}, {2,3}, {3,4}, {4,1},
-			{5,6}, {6,7}, {7,8}, {8,5},
-			{1,5}, {2,6}, {3,7}, {4,8},
-		}
-
-		for i, edge in edges do
-			local line = obj._Lines[i]
-			if line then
-				if visible then
-					line.From = projected[edge[1]]
-					line.To = projected[edge[2]]
-					line.Visible = true
-				else
-					line.Visible = false
-				end
-			end
-		end
-
-		if obj._TextLabel then
-			if visible and obj._ShowText then
-				local sp = Camera:WorldToViewportPoint(pos + Vector3.new(0, half.Y + 1, 0))
-				obj._TextLabel.Position = Vector2.new(sp.X, sp.Y)
-				obj._TextLabel.Visible = true
-			else
-				obj._TextLabel.Visible = false
-			end
-		end
-	end
-
-	local function updateText(obj, cat)
-		if not obj._Position then return end
-		local sp, onScreen = Camera:WorldToViewportPoint(obj._Position)
-		local visible = cat._Visible and obj._ShouldShow and onScreen
-		if visible then
-			obj._Drawing.Position = Vector2.new(sp.X, sp.Y)
-			obj._Drawing.Visible = true
-		else
-			obj._Drawing.Visible = false
-		end
-	end
-
-	local function updateHighlight(obj, cat)
-		if not obj._TargetPart or not obj._Highlight then return end
-		local partOk = obj._TargetPart.Parent ~= nil
-		local shouldShow = cat._Visible and obj._ShouldShow and partOk
-		obj._Highlight.Enabled = shouldShow
-
-		if obj._TextLabel then
-			if shouldShow then
-				local sp, onScreen = Camera:WorldToViewportPoint(obj._TargetPart.Position + Vector3.new(0, 2, 0))
-				if onScreen then
-					obj._TextLabel.Position = Vector2.new(sp.X, sp.Y)
-					obj._TextLabel.Visible = true
-				else
-					obj._TextLabel.Visible = false
-				end
-			else
-				obj._TextLabel.Visible = false
-			end
-		end
+		return bb, tl
 	end
 
 	--// Category
@@ -118,20 +47,7 @@ function EspLibrary.new()
 		function Cat:SetVisible(v)
 			Cat._Visible = v
 			for _, obj in Cat._Objects do
-				if obj._Lines then
-					for _, line in obj._Lines do
-						line.Visible = false
-					end
-				end
-				if obj._TextLabel then
-					obj._TextLabel.Visible = false
-				end
-				if obj._Drawing then
-					obj._Drawing.Visible = false
-				end
-				if obj._Highlight then
-					obj._Highlight.Enabled = false
-				end
+				if obj.SetVisible then obj:SetVisible(v) end
 			end
 		end
 
@@ -142,67 +58,70 @@ function EspLibrary.new()
 			Box._Position = nil
 			Box._Size = options.Size or Vector3.new(4, 4, 4)
 			Box._FillColor = options.FillColor or Color3.new(1, 0, 0)
-			Box._BorderColor = options.BorderColor or options.FillColor or Color3.new(1, 0, 0)
 			Box._Transparency = options.Transparency or 0
 			Box._ShowText = options.ShowText
-			Box._Lines = {}
+
+			local part = Instance.new("Part")
+			part.Name = "ChipEsp_Box"
+			part.Size = Box._Size
+			part.Anchored = true
+			part.CanCollide = false
+			part.CanQuery = false
+			part.CanTouch = false
+			part.CastShadow = false
+			part.Material = Enum.Material.SmoothPlastic
+			part.Color = Box._FillColor
+			part.Transparency = Box._Transparency
+			part.Parent = workspace
+			Box._Part = part
+
+			Box._Billboard = nil
 			Box._TextLabel = nil
-
-			for i = 1, 12 do
-				local line = Drawing.new("Line")
-				line.Visible = false
-				line.Color = Box._BorderColor
-				line.Thickness = 1.5
-				line.Transparency = 1 - Box._Transparency
-				Box._Lines[i] = line
-			end
-
 			if Box._ShowText then
-				local txt = Drawing.new("Text")
-				txt.Visible = false
-				txt.Color = Box._FillColor
-				txt.Size = 14
-				txt.Center = true
-				txt.Outline = true
-				txt.OutlineColor = Color3.new(0, 0, 0)
-				txt.Text = tostring(Box._ShowText)
-				Box._TextLabel = txt
+				local bb, tl = makeBillboard(part, Box._ShowText, Box._FillColor, Vector3.new(0, Box._Size.Y * 0.5 + 1, 0))
+				Box._Billboard = bb
+				Box._TextLabel = tl
 			end
 
 			function Box:SetPosition(pos)
 				Box._Position = pos
+				if Box._Part then
+					Box._Part.CFrame = CFrame.new(pos)
+				end
 			end
 
 			function Box:SetSize(s)
 				Box._Size = s
+				if Box._Part then
+					Box._Part.Size = s
+				end
+				if Box._Billboard then
+					Box._Billboard.StudsOffset = Vector3.new(0, s.Y * 0.5 + 1, 0)
+				end
 			end
 
 			function Box:SetVisible(v)
 				Box._ShouldShow = v
-				if not v then
-					for _, line in Box._Lines do
-						line.Visible = false
-					end
-					if Box._TextLabel then
-						Box._TextLabel.Visible = false
-					end
+				if Box._Part then
+					Box._Part.Transparency = v and Box._Transparency or 1
+				end
+				if Box._Billboard then
+					Box._Billboard.Enabled = v
 				end
 			end
 
 			function Box:SetTransparency(t)
 				Box._Transparency = t
-				for _, line in Box._Lines do
-					line.Transparency = 1 - t
+				if Box._Part and Box._ShouldShow then
+					Box._Part.Transparency = t
 				end
 			end
 
 			function Box:Destroy()
-				for _, line in Box._Lines do line:Remove() end
-				if Box._TextLabel then Box._TextLabel:Remove() end
+				if Box._Part then Box._Part:Destroy() end
 			end
 
 			table.insert(Cat._Objects, Box)
-			table.insert(Esp._AllObjects, { obj = Box, cat = Cat, kind = "box" })
 			return Box
 		end
 
@@ -214,27 +133,54 @@ function EspLibrary.new()
 			Txt._Color = options.Color or Color3.new(1, 1, 1)
 			Txt._Size = options.Size or 14
 
-			local d = Drawing.new("Text")
-			d.Visible = false
-			d.Color = Txt._Color
-			d.Size = Txt._Size
-			d.Center = options.Center or false
-			d.Outline = true
-			d.OutlineColor = Color3.new(0, 0, 0)
-			d.Text = options.Text or ""
-			Txt._Drawing = d
+			local part = Instance.new("Part")
+			part.Name = "ChipEsp_TextPart"
+			part.Size = Vector3.new(0.1, 0.1, 0.1)
+			part.Anchored = true
+			part.CanCollide = false
+			part.CanQuery = false
+			part.CanTouch = false
+			part.CastShadow = false
+			part.Transparency = 1
+			part.Parent = workspace
+			Txt._Part = part
 
-			function Txt:SetPosition(pos) Txt._Position = pos end
-			function Txt:SetText(t) Txt._Drawing.Text = tostring(t) end
-			function Txt:SetColor(c) Txt._Drawing.Color = c end
+			local bb, tl = makeBillboard(part, options.Text, Txt._Color, Vector3.new(0, 0, 0))
+			tl.TextSize = Txt._Size
+			Txt._Billboard = bb
+			Txt._TextLabel = tl
+
+			function Txt:SetPosition(pos)
+				Txt._Position = pos
+				if Txt._Part then
+					Txt._Part.CFrame = CFrame.new(pos)
+				end
+			end
+
+			function Txt:SetText(t)
+				if Txt._TextLabel then
+					Txt._TextLabel.Text = tostring(t)
+				end
+			end
+
+			function Txt:SetColor(c)
+				if Txt._TextLabel then
+					Txt._TextLabel.TextColor3 = c
+				end
+			end
+
 			function Txt:SetVisible(v)
 				Txt._ShouldShow = v
-				if not v then Txt._Drawing.Visible = false end
+				if Txt._Billboard then
+					Txt._Billboard.Enabled = v
+				end
 			end
-			function Txt:Destroy() Txt._Drawing:Remove() end
+
+			function Txt:Destroy()
+				if Txt._Part then Txt._Part:Destroy() end
+			end
 
 			table.insert(Cat._Objects, Txt)
-			table.insert(Esp._AllObjects, { obj = Txt, cat = Cat, kind = "text" })
 			return Txt
 		end
 
@@ -243,34 +189,29 @@ function EspLibrary.new()
 			local HighlightObj = {}
 			HighlightObj._ShouldShow = true
 			HighlightObj._TargetPart = options.TargetPart
-			HighlightObj._ShowText = options.ShowText or nil
-			HighlightObj._BorderColor = options.BorderColor or Color3.new(1, 0, 0)
+			HighlightObj._ShowText = options.ShowText
 			HighlightObj._FillColor = options.FillColor or Color3.new(1, 0, 0)
+			HighlightObj._BorderColor = options.BorderColor or Color3.new(1, 0, 0)
 			HighlightObj._Transparency = options.Transparency or 0.5
 
 			local hl = Instance.new("Highlight")
 			hl.Name = "ChipEsp_Highlight"
-			hl.Adornee = HighlightObj._TargetPart
 			hl.FillColor = HighlightObj._FillColor
 			hl.OutlineColor = HighlightObj._BorderColor
 			hl.FillTransparency = HighlightObj._Transparency
 			hl.OutlineTransparency = 0
 			hl.Enabled = true
 			hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-			hl.Parent = HighlightObj._TargetPart.Parent or workspace
+			hl.Adornee = HighlightObj._TargetPart
+			hl.Parent = workspace
 			HighlightObj._Highlight = hl
 
+			HighlightObj._Billboard = nil
 			HighlightObj._TextLabel = nil
 			if HighlightObj._ShowText then
-				local txt = Drawing.new("Text")
-				txt.Visible = false
-				txt.Color = HighlightObj._BorderColor
-				txt.Size = 14
-				txt.Center = true
-				txt.Outline = true
-				txt.OutlineColor = Color3.new(0, 0, 0)
-				txt.Text = tostring(HighlightObj._ShowText)
-				HighlightObj._TextLabel = txt
+				local bb, tl = makeBillboard(HighlightObj._TargetPart, HighlightObj._ShowText, HighlightObj._BorderColor, Vector3.new(0, 2, 0))
+				HighlightObj._Billboard = bb
+				HighlightObj._TextLabel = tl
 			end
 
 			function HighlightObj:SetVisible(v)
@@ -278,8 +219,8 @@ function EspLibrary.new()
 				if HighlightObj._Highlight then
 					HighlightObj._Highlight.Enabled = v
 				end
-				if HighlightObj._TextLabel then
-					HighlightObj._TextLabel.Visible = v
+				if HighlightObj._Billboard then
+					HighlightObj._Billboard.Enabled = v
 				end
 			end
 
@@ -287,6 +228,9 @@ function EspLibrary.new()
 				HighlightObj._TargetPart = part
 				if HighlightObj._Highlight then
 					HighlightObj._Highlight.Adornee = part
+				end
+				if HighlightObj._Billboard then
+					HighlightObj._Billboard.Adornee = part
 				end
 			end
 
@@ -302,14 +246,13 @@ function EspLibrary.new()
 					HighlightObj._Highlight:Destroy()
 					HighlightObj._Highlight = nil
 				end
-				if HighlightObj._TextLabel then
-					HighlightObj._TextLabel:Remove()
-					HighlightObj._TextLabel = nil
+				if HighlightObj._Billboard then
+					HighlightObj._Billboard:Destroy()
+					HighlightObj._Billboard = nil
 				end
 			end
 
 			table.insert(Cat._Objects, HighlightObj)
-			table.insert(Esp._AllObjects, { obj = HighlightObj, cat = Cat, kind = "highlight" })
 			return HighlightObj
 		end
 
@@ -317,30 +260,12 @@ function EspLibrary.new()
 		return Cat
 	end
 
-	--// Render loop
-	Esp._UpdateConn = RunService.RenderStepped:Connect(function()
-		Camera = workspace.CurrentCamera
-		for i = 1, #Esp._AllObjects do
-			local entry = Esp._AllObjects[i]
-			local ok, err = pcall(function()
-				if entry.kind == "box" then
-					updateBox(entry.obj, entry.cat)
-				elseif entry.kind == "text" then
-					updateText(entry.obj, entry.cat)
-				elseif entry.kind == "highlight" then
-					updateHighlight(entry.obj, entry.cat)
-				end
-			end)
-		end
-	end)
-
-	--// Cleanup
 	function Esp:Destroy()
-		if Esp._UpdateConn then Esp._UpdateConn:Disconnect() end
-		for _, entry in Esp._AllObjects do
-			if entry.obj.Destroy then entry.obj:Destroy() end
+		for _, cat in pairs(Esp._Categories) do
+			for _, obj in cat._Objects do
+				if obj.Destroy then obj:Destroy() end
+			end
 		end
-		Esp._AllObjects = {}
 		Esp._Categories = {}
 	end
 
