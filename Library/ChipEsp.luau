@@ -154,6 +154,13 @@ function EspLibrary.new()
 				Box._ShouldShow = v
 			end
 
+			function Box:SetTransparency(t)
+				Box._Transparency = t
+				for _, line in Box._Lines do
+					line.Transparency = 1 - t
+				end
+			end
+
 			function Box:Destroy()
 				for _, line in Box._Lines do line:Remove() end
 				if Box._TextLabel then Box._TextLabel:Remove() end

@@ -145,9 +145,147 @@ pcall(function()
 	gameThumb = "https://www.roblox.com/asset-thumbnail/image?assetId=" .. PlaceId .. "&width=420&height=420&format=png"
 end)
 
-	local GameCard = HomeCat:AddCard(gameThumb, GameName, "GameScript: None", "Generic Scripts: 0 loaded")
-	Hub._GsCard = GameCard
-	Hub._TypesCard = GameCard
+local playerThumb = ""
+pcall(function()
+	playerThumb = Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+end)
+
+-- Player Welcome Card (50% height)
+do
+	local frame = HomeCat:AddFrame(UDim2.new(1, 0, 0.5, -4))
+	frame.BackgroundColor3 = Color3.fromRGB(36, 38, 52)
+	frame.ClipsDescendants = true
+	local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 10); corner.Parent = frame
+
+	if playerThumb ~= "" then
+		local img = Instance.new("ImageLabel")
+		img.Size = UDim2.new(0.35, 0, 1, 0)
+		img.Position = UDim2.new(0, 0, 0, 0)
+		img.BackgroundTransparency = 1
+		img.Image = playerThumb
+		img.ScaleType = Enum.ScaleType.Crop
+		img.Parent = frame
+	end
+
+	local textContainer = Instance.new("Frame")
+	textContainer.Size = UDim2.new(1, playerThumb ~= "" and -140 or -28, 1, 0)
+	textContainer.Position = UDim2.new(0, playerThumb ~= "" and 140 or 14, 0, 0)
+	textContainer.BackgroundTransparency = 1
+	textContainer.Parent = frame
+
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 16)
+	padding.PaddingBottom = UDim.new(0, 16)
+	padding.PaddingLeft = UDim.new(0, 4)
+	padding.PaddingRight = UDim.new(0, 8)
+	padding.Parent = textContainer
+
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Padding = UDim.new(0, 4)
+	layout.Parent = textContainer
+
+	local welcomeLabel = Instance.new("TextLabel")
+	welcomeLabel.Size = UDim2.new(1, 0, 0, 0)
+	welcomeLabel.AutomaticSize = Enum.AutomaticSize.Y
+	welcomeLabel.BackgroundTransparency = 1
+	welcomeLabel.Text = "Welcome, " .. Player.DisplayName .. "!"
+	welcomeLabel.TextColor3 = Color3.fromRGB(230, 232, 240)
+	welcomeLabel.TextSize = 22
+	welcomeLabel.Font = Enum.Font.GothamBold
+	welcomeLabel.TextXAlignment = Enum.TextXAlignment.Left
+	welcomeLabel.TextWrapped = true
+	welcomeLabel.Parent = textContainer
+
+	local subLabel = Instance.new("TextLabel")
+	subLabel.Size = UDim2.new(1, 0, 0, 0)
+	subLabel.AutomaticSize = Enum.AutomaticSize.Y
+	subLabel.BackgroundTransparency = 1
+	subLabel.Text = "ChipLag Hub"
+	subLabel.TextColor3 = Color3.fromRGB(140, 145, 165)
+	subLabel.TextSize = 16
+	subLabel.Font = Enum.Font.Gotham
+	subLabel.TextXAlignment = Enum.TextXAlignment.Left
+	subLabel.TextWrapped = true
+	subLabel.Parent = textContainer
+end
+
+-- Game Info Card (50% height)
+do
+	local frame = HomeCat:AddFrame(UDim2.new(1, 0, 0.5, -4))
+	frame.BackgroundColor3 = Color3.fromRGB(36, 38, 52)
+	frame.ClipsDescendants = true
+	local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 10); corner.Parent = frame
+
+	if gameThumb ~= "" then
+		local img = Instance.new("ImageLabel")
+		img.Size = UDim2.new(0.35, 0, 1, 0)
+		img.Position = UDim2.new(0, 0, 0, 0)
+		img.BackgroundTransparency = 1
+		img.Image = gameThumb
+		img.ScaleType = Enum.ScaleType.Crop
+		img.Parent = frame
+	end
+
+	local textContainer = Instance.new("Frame")
+	textContainer.Size = UDim2.new(1, gameThumb ~= "" and -140 or -28, 1, 0)
+	textContainer.Position = UDim2.new(0, gameThumb ~= "" and 140 or 14, 0, 0)
+	textContainer.BackgroundTransparency = 1
+	textContainer.Parent = frame
+
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 16)
+	padding.PaddingBottom = UDim.new(0, 16)
+	padding.PaddingLeft = UDim.new(0, 4)
+	padding.PaddingRight = UDim.new(0, 8)
+	padding.Parent = textContainer
+
+	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Padding = UDim.new(0, 4)
+	layout.Parent = textContainer
+
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.Size = UDim2.new(1, 0, 0, 0)
+	titleLabel.AutomaticSize = Enum.AutomaticSize.Y
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = GameName
+	titleLabel.TextColor3 = Color3.fromRGB(230, 232, 240)
+	titleLabel.TextSize = 22
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.TextWrapped = true
+	titleLabel.Parent = textContainer
+
+	local gsLabel2 = Instance.new("TextLabel")
+	gsLabel2.Size = UDim2.new(1, 0, 0, 0)
+	gsLabel2.AutomaticSize = Enum.AutomaticSize.Y
+	gsLabel2.BackgroundTransparency = 1
+	gsLabel2.Text = "GameScript: None"
+	gsLabel2.TextColor3 = Color3.fromRGB(140, 145, 165)
+	gsLabel2.TextSize = 16
+	gsLabel2.Font = Enum.Font.Gotham
+	gsLabel2.TextXAlignment = Enum.TextXAlignment.Left
+	gsLabel2.TextWrapped = true
+	gsLabel2.Parent = textContainer
+
+	local typesLabel2 = Instance.new("TextLabel")
+	typesLabel2.Size = UDim2.new(1, 0, 0, 0)
+	typesLabel2.AutomaticSize = Enum.AutomaticSize.Y
+	typesLabel2.BackgroundTransparency = 1
+	typesLabel2.Text = "Generic Scripts: 0 loaded"
+	typesLabel2.TextColor3 = Color3.fromRGB(140, 145, 165)
+	typesLabel2.TextSize = 16
+	typesLabel2.Font = Enum.Font.Gotham
+	typesLabel2.TextXAlignment = Enum.TextXAlignment.Left
+	typesLabel2.TextWrapped = true
+	typesLabel2.Parent = textContainer
+
+	Hub._GsCard = { SetSubtitle = function(_, s) gsLabel2.Text = s end }
+	Hub._TypesCard = { SetFooter = function(_, f) typesLabel2.Text = f end }
+end
 
 --// ============================================================
 --// Generic Scripts Tab

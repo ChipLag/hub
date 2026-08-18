@@ -938,6 +938,18 @@ function Library.new(options)
 			return cardObj
 		end
 
+		function catObj:AddFrame(size)
+			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
+			local frame = new("Frame", {
+				Size = size or UDim2.new(1, 0, 0, 80),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				LayoutOrder = order,
+				Parent = catFrame,
+			})
+			return frame
+		end
+
 		function catObj:AddLoopingToggle(text, loopFunc, changeFunc)
 			local order = catObj._OrderCounter; catObj._OrderCounter = order + 1
 			local elem = createLoopingToggle(catFrame, text, loopFunc, changeFunc, order)
@@ -1223,19 +1235,24 @@ function Library.new(options)
 
 	function Lib:Notify(text, duration)
 		duration = duration or 3
-		local notif = new("Frame", {
-			Size = UDim2.new(1, 0, 0, 48),
+
+		local notif = new("CanvasGroup", {
+			Size = UDim2.new(1, 0, 0, 0),
 			BackgroundColor3 = T.Notif,
 			BorderSizePixel = 0,
+			ClipsDescendants = true,
 			Parent = NotifHolder,
 		})
 		new("UICorner", { CornerRadius = UDim.new(0, 8), Parent = notif })
-		new("Frame", {
-			Size = UDim2.new(0, 3, 1, 0),
+
+		local bar = new("Frame", {
+			Size = UDim2.new(1, 0, 0, 3),
+			Position = UDim2.new(0, 0, 1, -3),
 			BackgroundColor3 = T.Accent,
 			BorderSizePixel = 0,
 			Parent = notif,
 		})
+
 		new("TextLabel", {
 			Size = UDim2.new(1, -18, 1, 0),
 			Position = UDim2.new(0, 14, 0, 0),
@@ -1248,6 +1265,24 @@ function Library.new(options)
 			TextWrapped = true,
 			Parent = notif,
 		})
+
+		notif.Size = UDim2.new(1, 0, 0, 48)
+
+		local startTime = tick()
+		local conn
+		conn = game:GetService("RunService").Heartbeat:Connect(function()
+			if not notif or not notif.Parent then
+				conn:Disconnect()
+				return
+			end
+			local elapsed = tick() - startTime
+			local remaining = math.clamp(1 - elapsed / duration, 0, 1)
+			bar.Size = UDim2.new(remaining, 0, 0, 3)
+			if remaining <= 0 then
+				conn:Disconnect()
+			end
+		end)
+
 		task.delay(duration, function()
 			if notif and notif.Parent then notif:Destroy() end
 		end)
