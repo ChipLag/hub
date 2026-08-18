@@ -87,7 +87,7 @@ function Library.new(options)
 	--// Main Frame (centered panel)
 	Lib.Main = new("Frame", {
 		Name = "Main",
-		Size = UDim2.new(0, isMobile() and 380 or 960, 0, isMobile() and 540 or 440),
+		Size = UDim2.new(0.55, 0, 0.55, 0),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = T.Bg,
@@ -97,8 +97,9 @@ function Library.new(options)
 	})
 	new("UICorner", { CornerRadius = UDim.new(0, 10), Parent = Lib.Main })
 	new("UIStroke", { Color = T.Border, Thickness = 1, Parent = Lib.Main })
+	new("UIAspectRatioConstraint", { AspectRatio = 2.0, Parent = Lib.Main })
 
-	local SidebarW = isMobile() and 120 or 180
+	local SidebarW = 180
 
 	--// Sidebar
 	local Sidebar = new("Frame", {
