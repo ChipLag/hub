@@ -6,6 +6,7 @@ local repo = "https://raw.githubusercontent.com/ChipLag/hub/refs/heads/main/"
 
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
+local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
 local PlaceId = game.PlaceId
@@ -29,30 +30,62 @@ Window._Esp = Esp
 local Hub = {}
 Hub._GameScriptLoaded = false
 Hub._TypesLoaded = 0
-Hub._GsLabel = nil
+Hub._GsStatus = nil
 Hub._TypesLabel = nil
+Hub._Loading = {}
+
+--// ============================================================
+--// Per-Game Save/Load of Generic Scripts
+--// ============================================================
+
+local function getSavePath()
+	return "ChipLag/Generics/" .. tostring(PlaceId) .. ".json"
+end
+
+local function loadSavedTypes()
+	local ok, result = pcall(function()
+		if readfile and isfile then
+			local path = getSavePath()
+			if isfile(path) then
+				local content = readfile(path)
+				return HttpService:JSONDecode(content)
+			end
+		end
+	end)
+	if ok and type(result) == "table" then
+		return result
+	end
+	return {}
+end
+
+local function saveEnabledTypes(types)
+	pcall(function()
+		if writefile then
+			writefile(getSavePath(), HttpService:JSONEncode(types))
+		end
+	end)
+end
+
+local SavedTypes = loadSavedTypes()
 
 --// ============================================================
 --// Extend Window with script-specific API
 --// ============================================================
 
--- Scripts call Window:Notification(duration, message)
 function Window:Notification(duration, message)
 	Window:Notify(tostring(message), tonumber(duration) or 3)
 end
 
--- Scripts call Window:TypeTab(name) -> returns a Tab
 function Window:TypeTab(name)
 	local tab = Window:AddTab(name, 30 + Hub._TypesLoaded)
 	return tab
 end
 
--- Scripts call Window:GameScript(name) -> returns a Tab
 function Window:GameScript(name)
 	local tab = Window:AddTab(name, 20)
 	Hub._GameScriptLoaded = true
-	if Hub._GsLabel then
-		Hub._GsLabel:SetText("GameScript: " .. name)
+	if Hub._GsStatus then
+		Hub._GsStatus:SetText("GameScript: Loaded")
 	end
 	return tab
 end
@@ -102,31 +135,24 @@ end
 local HomeTab = Window:AddTab("Home", 1)
 local HomeCat = HomeTab:AddCategory("Info")
 
--- Player icon + welcome
-local PlayerName = Player.DisplayName
+local GameName = "Unknown Game"
+pcall(function()
+	GameName = MarketplaceService:GetProductInfo(PlaceId).Name
+end)
 
 local playerThumb = ""
 pcall(function()
 	playerThumb = Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
 end)
+
 if playerThumb ~= "" then
-	HomeCat:AddImage(playerThumb, 40)
+	HomeCat:AddImage(playerThumb, 52)
 end
 
-HomeCat:AddLabel("Welcome, " .. PlayerName .. "!")
-
--- Game name
-local GameName = "Unknown"
-pcall(function()
-	GameName = MarketplaceService:GetProductInfo(PlaceId).Name
-end)
+HomeCat:AddLabel("Welcome, " .. Player.DisplayName .. "!")
 HomeCat:AddLabel("Game: " .. GameName)
-
--- GameScript status
-Hub._GsLabel = HomeCat:AddLabel("GameScript: None")
-
--- Types loaded
-Hub._TypesLabel = HomeCat:AddLabel("Types Loaded: 0")
+Hub._GsStatus = HomeCat:AddLabel("GameScript: None")
+Hub._TypesLabel = HomeCat:AddLabel("Generic Scripts: 0 loaded")
 
 --// ============================================================
 --// Generic Scripts Tab
@@ -136,53 +162,81 @@ local TypesTab = Window:AddTab("Generic scripts", 2)
 local TypesCat = TypesTab:AddCategory("Types")
 
 local TypeRegistry = fetchScript("Scripts/Types.luau")
+local LoadedTypes = {}
 
-local LoadedTypes = {} -- name -> { tab, cleanup, toggles }
+local function enableType(displayName, fileName)
+	if LoadedTypes[displayName] or Hub._Loading[displayName] then return end
+	Hub._Loading[displayName] = true
+
+	local ok, err = pcall(loadScript, "Scripts/Types/" .. fileName .. ".luau", Window, Esp)
+	if not ok then
+		warn("[ChipLag] Type load failed (" .. displayName .. "): " .. tostring(err))
+		Window:Notify("Failed: " .. displayName .. " - " .. tostring(err), 5)
+	else
+		LoadedTypes[displayName] = true
+		Hub._TypesLoaded = Hub._TypesLoaded + 1
+		if Hub._TypesLabel then
+			Hub._TypesLabel:SetText("Generic Scripts: " .. Hub._TypesLoaded .. " loaded")
+		end
+		SavedTypes[displayName] = true
+		saveEnabledTypes(SavedTypes)
+	end
+	Hub._Loading[displayName] = nil
+end
+
+local function disableType(displayName)
+	if not LoadedTypes[displayName] then return end
+
+	for tabName, tab in pairs(Window._Tabs) do
+		if tabName == displayName then
+			for id, hb in pairs(Window._Heartbeats) do
+				if hb.Tab == tabName then
+					if hb.Connection then hb.Connection:Disconnect() end
+					Window._Heartbeats[id] = nil
+				end
+			end
+			if tab._CleanupFunc then
+				pcall(tab._CleanupFunc)
+			end
+			Window:RemoveTab(tabName)
+			break
+		end
+	end
+
+	LoadedTypes[displayName] = nil
+	Hub._TypesLoaded = Hub._TypesLoaded - 1
+	if Hub._TypesLabel then
+		Hub._TypesLabel:SetText("Generic Scripts: " .. Hub._TypesLoaded .. " loaded")
+	end
+	SavedTypes[displayName] = nil
+	saveEnabledTypes(SavedTypes)
+end
 
 if TypeRegistry then
 	for displayName, fileName in pairs(TypeRegistry) do
-		local toggle = TypesCat:AddToggle(displayName, false, function(state)
+		TypesCat:AddToggle(displayName, SavedTypes[displayName] == true, function(state)
 			if state then
-				local ok, err = pcall(loadScript, "Scripts/Types/" .. fileName .. ".luau", Window, Esp)
-				if not ok then
-					warn("[ChipLag] Type load failed (" .. displayName .. "): " .. tostring(err))
-					Window:Notify("Failed: " .. displayName .. " - " .. tostring(err), 5)
-				else
-					LoadedTypes[displayName] = true
-					Hub._TypesLoaded = Hub._TypesLoaded + 1
-					if Hub._TypesLabel then
-						Hub._TypesLabel:SetText("Types Loaded: " .. Hub._TypesLoaded)
-					end
-				end
+				enableType(displayName, fileName)
 			else
-				for tabName, tab in pairs(Window._Tabs) do
-					if tabName == displayName then
-						for id, hb in pairs(Window._Heartbeats) do
-							if hb.Tab == tabName then
-								if hb.Connection then hb.Connection:Disconnect() end
-								Window._Heartbeats[id] = nil
-							end
-						end
-						if tab._CleanupFunc then
-							pcall(tab._CleanupFunc)
-						end
-						Window:RemoveTab(tabName)
-						break
-					end
-				end
-				LoadedTypes[displayName] = nil
-				Hub._TypesLoaded = Hub._TypesLoaded - 1
-				if Hub._TypesLabel then
-					Hub._TypesLabel:SetText("Types Loaded: " .. Hub._TypesLoaded)
-				end
+				disableType(displayName)
 			end
 		end)
 	end
 end
 
+task.defer(function()
+	if TypeRegistry then
+		for displayName, fileName in pairs(TypeRegistry) do
+			if SavedTypes[displayName] then
+				enableType(displayName, fileName)
+			end
+		end
+	end
+end)
+
 --// ============================================================
 --// Game Script (direct load by PlaceId)
--- ============================================================
+--// ============================================================
 
 do
 	local path = "Scripts/Games/" .. tostring(PlaceId) .. ".luau"
@@ -191,6 +245,9 @@ do
 		warn("[ChipLag] Loaded GameScript for place " .. tostring(PlaceId))
 	else
 		warn("[ChipLag] No GameScript for place " .. tostring(PlaceId) .. " (" .. tostring(err) .. ")")
+		if Hub._GsStatus then
+			Hub._GsStatus:SetText("GameScript: Error!")
+		end
 	end
 end
 
